@@ -3,18 +3,34 @@ import React from 'react';
 import { View, Text, TouchableNativeFeedback, StyleSheet } from 'react-native';
 
 interface CardProps {
-    title: String;
-    cards: Object[];
+    card: {
+        title: string,
+        id: string,
+        createdAt: string
+    };
+    cards: {
+        title: string,
+        id: string,
+        createdAt: string
+    }[];
     index: Number;
-    createdAt: String;
+    navigation: {
+        push: Function,
+        goBack: Function,
+    };
 }
 
-function Card({ title, createdAt, cards, index }: CardProps) {
+function Card({ card, cards, index, navigation }: CardProps) {
+
+    const openList = () => { 
+        navigation.push('List', { card, cards })
+    }
+
     return (
-        <TouchableNativeFeedback>
-            <View style={[styles.container, {marginBottom: index === cards.length - 1 ? 150 : 0}]}>
-                <Text>{title}</Text>
-                <Text style={styles.date}>{createdAt}</Text>
+        <TouchableNativeFeedback onPress={openList}>
+            <View style={[styles.container, {marginBottom: index === cards.length - 1 ? 90 : 0}]}>
+                <Text>{card.title}</Text>
+                <Text style={styles.date}>{card.createdAt}</Text>
             </View>
         </TouchableNativeFeedback>
     );
