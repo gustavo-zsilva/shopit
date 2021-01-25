@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 import {
     View,
@@ -6,20 +6,28 @@ import {
     StyleSheet,
     TouchableNativeFeedback,
     TouchableOpacity,
-    StatusBar,
     TextInput,
-    ScrollView
+    Alert,
+    ScrollView,
+    ImageBackground
 } from 'react-native';
 
 import { useNavigation } from '@react-navigation/native';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import saveToStorage from '../utils/saveToStorage';
 import { v4 as uuidv4 } from 'uuid';
 
 import { LinearGradient } from 'expo-linear-gradient';
 
 import Icon from 'react-native-vector-icons/Feather';
+import MaterialIcon from 'react-native-vector-icons/MaterialCommunityIcons';
+
 import Item from '../components/Item';
+import Header from '../components/Header';
+
+import { globalStyles, WhiteColor } from '../styles/global';
+import { iconStyles } from '../styles/icons';
 
 interface Card {
     title: string;
@@ -40,6 +48,8 @@ function List({ route }: any) {
     const card: Card = route.params.card;
     const cards = route.params.cards;
     
+    const [items, setItems] = useState([...card.items]);
+    
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [itemName, setItemName] = useState('');
@@ -48,7 +58,7 @@ function List({ route }: any) {
     const newCard = {...card}
 
     // Checked items array
-    let completedItems = newCard.items.filter(item => item.isCompleted);
+    let completedItems = items.filter(item => item.isCompleted);
 
     // Sum of completed items prices
     let pricesArray = completedItems
@@ -58,9 +68,10 @@ function List({ route }: any) {
     const [itemsLeft, setItemsLeft] = useState(completedItems.length);
     const [completedItemsPrice, setCompletedItemsPrice] = useState(pricesArray);
 
+
     // Function to refresh states to use between components, to avoid passing many constants on props
     const refreshStates = () => {
-        completedItems = newCard.items.filter(item => item.isCompleted);
+        completedItems = items.filter(item => item.isCompleted);
    
         pricesArray = completedItems
             .map((item: any) => item.price)
@@ -70,10 +81,41 @@ function List({ route }: any) {
         setCompletedItemsPrice(pricesArray);
     }
 
+    
+    const deleteAlert = () => {
 
-    const addNewItem = async () => {
+        if (cards.length <= 0) return;
 
-        if (itemName === '' || itemPrice === 0) return;
+        Alert.alert(
+            "Esta ação irá remover todas suas listas.",
+            "Deseja prosseguir?",
+            [
+                {
+                    text: "Sim",
+                    onPress: () => deleteAllItems(),
+                    style: 'destructive'
+                },
+                {
+                    text: "Voltar",
+                    style: 'cancel'
+                }
+            ]
+        )
+    }
+
+    const deleteAllItems = () => {
+        const newCards = [...cards];
+        const cardIndex = newCards.indexOf(card);
+
+        setItems([]);
+        newCards[cardIndex].items = [];
+        
+        saveToStorage(AsyncStorage, newCards);
+    }
+
+
+    const addNewItem = () => {
+        if (itemName === '') return;
 
         const newItem = {
             title: itemName,
@@ -82,35 +124,37 @@ function List({ route }: any) {
             id: uuidv4()
         }
 
-        // Copiar o array de cards
+        // Copy the cards array
         const newCards = [...cards];
 
-        // Pegar o index do card na lista de cards e mudar seus items, adicionando o novo
         const indexOfCard = cards.indexOf(card);
         newCards[indexOfCard].items.push(newItem);
 
-        try {
-            await AsyncStorage.setItem('cards', JSON.stringify(newCards));
-        } catch (err) {
-            console.error(err);
-        }
+        // Grab the index of the current card, then push the new Item to the card's item array
+        setItems(newCards[indexOfCard].items);
+
+        saveToStorage(AsyncStorage, newCards);
 
         setItemName('');
         setItemPrice(0);
         setIsModalOpen(false);
     }
+
+
+    useEffect(() => {
+        refreshStates();
+    }, [items])
     
 
     return (
 
-        <View style={styles.container}>
-
+        <ImageBackground source={require('../assets/shop-app-list-bg.png')} style={styles.container}>
         <ScrollView>
 
             {/* Header */}
-            <View style={styles.header}>
+            <Header>
                 <TouchableNativeFeedback onPress={() => navigation.goBack()}>
-                    <View style={styles.icon}>
+                    <View style={iconStyles.icon}>
                         <Icon
                             name="arrow-left"
                             size={32}
@@ -123,12 +167,12 @@ function List({ route }: any) {
                     {card.title}
                 </Text>
 
-                <Text style={[styles.headerText, styles.date]}>
-                    {itemsLeft}/{card.items.length}
+                <Text style={[styles.headerText, styles.itemsLeft]}>
+                    {itemsLeft}/{items.length}
                 </Text>
 
                 <TouchableOpacity onPress={() => setIsModalOpen(true)}>
-                    <View style={styles.icon}>
+                    <View style={iconStyles.icon}>
                         <Icon
                             name="plus"
                             size={32}
@@ -139,27 +183,27 @@ function List({ route }: any) {
 
                 {
                     isModalOpen && (
-                        <View style={[styles.header, styles.modal]}>
+                        <View style={globalStyles.modal}>
 
                             <View style={styles.inputBlock}>
-                                <Text style={styles.label}>
+                                <Text style={globalStyles.label}>
                                     Nome
                                 </Text>
                                 <TextInput
                                     placeholder="ex: Cebola"
-                                    style={styles.input}
+                                    style={globalStyles.input}
                                     value={itemName}
                                     onChangeText={(text) => setItemName(text)}
                                 />
                             </View>
 
                             <View style={styles.inputBlock}>
-                                <Text style={styles.label}>
+                                <Text style={globalStyles.label}>
                                     R$
                                 </Text>
                                 <TextInput
                                     placeholder="0"
-                                    style={styles.input}
+                                    style={globalStyles.input}
                                     keyboardType="numeric"
                                     onChangeText={(text) => {
                                         text.replace(/[^0-9]/g, '');
@@ -173,7 +217,7 @@ function List({ route }: any) {
                             <View style={styles.modalBtnContainer}>
 
                                 <TouchableNativeFeedback onPress={addNewItem}>
-                                    <View style={[styles.icon, styles.addItemIcon]}>
+                                    <View style={[iconStyles.icon, iconStyles.plusIcon]}>
                                         <Icon
                                             name="plus"
                                             size={32}
@@ -183,7 +227,7 @@ function List({ route }: any) {
                                 </TouchableNativeFeedback>
 
                                 <TouchableNativeFeedback onPress={() => setIsModalOpen(false)}>
-                                    <View style={[styles.icon, styles.closeModalIcon]}>
+                                    <View style={[iconStyles.icon, iconStyles.minusIcon]}>
                                         <Icon
                                             name="minus"
                                             size={32}
@@ -196,16 +240,18 @@ function List({ route }: any) {
                         </View>
                     )
                 }
-            </View>
+            </Header>
 
             <View style={styles.listContainer}>
                 {
-                    card.items.map((item: any, index) => {
+                    items.map((item: any, index) => {
                         return <Item
                             key={index}
-                            itemArray={[item, card.items, index]}
+                            itemArray={[item, index]}
                             cardArray={[cards, card]}
                             refreshStates={refreshStates}
+                            items={items}
+                            setItems={setItems}
                         />
                     })
                 }
@@ -215,7 +261,7 @@ function List({ route }: any) {
         <LinearGradient
             colors={['#FFF', 'transparent']}
             style={styles.totalPrice}
-            start={{ x: 0, y: 0 }}
+            start={{ x: 0.2, y: 0 }}
             end={{ x: 1, y: 0 }}
         >
             <Text style={styles.totalPriceText}>
@@ -226,8 +272,19 @@ function List({ route }: any) {
             </Text>
         </LinearGradient>
 
+        <TouchableOpacity 
+            style={globalStyles.deleteBtn} 
+            onPress={deleteAlert}
+            activeOpacity={0.5}
+        >
+            <MaterialIcon
+                name="delete-outline"
+                size={28}
+                color="#FFF"
+            />
+        </TouchableOpacity>
 
-        </View>
+        </ImageBackground>
 
     );
 }
@@ -235,46 +292,15 @@ function List({ route }: any) {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        paddingTop: StatusBar.currentHeight,
-    },
-
-    header: {
-        flexDirection: 'row',
-        padding: 20,
-        backgroundColor: 'dodgerblue',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 1 },
-        shadowRadius: 1,
-        elevation: 5
     },
 
     headerText: {
-        color: '#FFF',
+        color: WhiteColor,
         fontSize: 20
     },
 
-    icon: {
-        borderRadius: 50,
-        backgroundColor: '#517aff',
-        padding: 10,
-        shadowColor: '#000',
-        shadowRadius: 1,
-        elevation: 5
-    },
-
-    date: {
+    itemsLeft: {
         fontSize: 16
-    },
-
-    modal: {
-        position: 'absolute',
-        top: 0,
-        right: 0,
-        left: 0,
-        bottom: 0,
-        alignItems: 'flex-end'
     },
 
     inputBlock: {
@@ -282,37 +308,16 @@ const styles = StyleSheet.create({
         marginRight: 30
     },
 
-    label: {
-        color: '#FFF',
-        fontSize: 14,
-        marginBottom: 4
-    },
-
-    input: {
-        backgroundColor: '#FFF',
-        padding: 6,
-        borderRadius: 5
-    },
-
     modalBtnContainer: {
         flexDirection: 'row'
-    },
-
-    addItemIcon: {
-        backgroundColor: '#00e200',
-        marginRight: 10
-    },
-
-    closeModalIcon: {
-        backgroundColor: '#ff4848'
     },
 
     listContainer: {
         margin: 20,
         borderRadius: 8,
-        elevation: 5,
-        marginBottom: 100
-        
+        elevation: 3,
+        marginBottom: 100,
+        backgroundColor: 'transparent'
     },
 
     totalPrice: {

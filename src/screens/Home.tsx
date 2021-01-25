@@ -2,6 +2,9 @@ import React, {useState, useEffect} from 'react';
 
 import 'react-native-get-random-values';
 
+import { globalStyles, WhiteColor, BgColor } from '../styles/global';
+import { iconStyles } from '../styles/icons';
+
 import { v4 as uuidv4 } from 'uuid';
 
 import Icon from 'react-native-vector-icons/Feather';
@@ -15,21 +18,23 @@ import {
     TouchableOpacity,
     Alert,
     TouchableNativeFeedback,
-    TextInput
+    TextInput,
+    ImageBackground
 } from 'react-native';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-import Header from '../components/HeaderNew';
+import Header from '../components/Header';
 import Card from '../components/Card';
 
 interface Data {
     title: string;
     id: string;
     createdAt: string;
+    items: Object[];
 }
 
-function Home({ navigation, route }: any) {
+function Home({ navigation }: any) {
 
     const [cards, setCards] = useState<Data[]>([])
 
@@ -76,9 +81,7 @@ function Home({ navigation, route }: any) {
             const newCards = [...cards, newRegister]
 
             await AsyncStorage.setItem('cards', JSON.stringify(newCards));
-            await setCards(newCards);
-
-            console.log('REGISTRADO');
+            setCards(newCards);
             
             setIsSaving(false)
             setIsModalOpen(false)
@@ -86,6 +89,7 @@ function Home({ navigation, route }: any) {
             
         } catch (err) {
             console.error(err);
+            
             setIsSaving(false)
             setIsModalOpen(false)
             setListName('')
@@ -127,12 +131,12 @@ function Home({ navigation, route }: any) {
     }, [])
 
     return (
-        <View style={styles.container}>
+        <ImageBackground source={require('../assets/shop-app-bg.png')} style={styles.container} >
 
             <Header>
-                <Text style={styles.text}>Suas Listas</Text>
+                <Text style={globalStyles.text}>Suas Listas</Text>
                 <TouchableNativeFeedback onPress={() => setIsModalOpen(true)}>
-                    <View style={styles.icon}>
+                    <View style={iconStyles.icon}>
                         <Icon name="plus" size={32} color="#FFF" />
                     </View>
                 </TouchableNativeFeedback>
@@ -147,11 +151,11 @@ function Home({ navigation, route }: any) {
 
                 {
                     isModalOpen && (
-                        <View style={styles.modal}>
+                        <View style={globalStyles.modal}>
                             <View style={styles.inputBlock}>
-                                <Text style={styles.inputLabel}>Nome da lista</Text>
+                                <Text style={globalStyles.label}>Nome da lista</Text>
                                 <TextInput
-                                    style={styles.newListNameInput}
+                                    style={globalStyles.input}
                                     value={listName}
                                     onChangeText={(text) => setListName(text)}
                                     placeholder="Ex: Fruteira, Supermercado, ..."
@@ -161,7 +165,7 @@ function Home({ navigation, route }: any) {
                             <View style={styles.buttonBlock}>
     
                                 <TouchableNativeFeedback onPress={addNewList}>
-                                    <View style={[styles.icon, styles.plusIcon]}>
+                                    <View style={[iconStyles.icon, iconStyles.plusIcon]}>
                                         <Icon
                                             name="plus"
                                             size={32}
@@ -171,7 +175,7 @@ function Home({ navigation, route }: any) {
                                 </TouchableNativeFeedback>
                                 
                                 <TouchableNativeFeedback onPress={() => setIsModalOpen(false)}>
-                                    <View style={[styles.icon, styles.minusIcon]}>
+                                    <View style={[iconStyles.icon, iconStyles.minusIcon]}>
                                         <Icon
                                             name="minus"
                                             size={32}
@@ -186,6 +190,9 @@ function Home({ navigation, route }: any) {
                 }
             </Header>
 
+           
+
+            
             <ScrollView contentContainerStyle={{alignItems: 'center'}} style={styles.scrollView}>          
                     {
                         cards.length > 0 ? (
@@ -194,6 +201,7 @@ function Home({ navigation, route }: any) {
                                     key={index}
                                     card={card}
                                     cards={cards}
+                                    setCards={setCards}
                                     index={index}
                                     navigation={navigation}
                                 />
@@ -202,7 +210,7 @@ function Home({ navigation, route }: any) {
                             <View style={styles.noListsMessage}>
                                 <Icon
                                     name="moon"
-                                    size={32}
+                                    size={44}
                                     color="#517aff"
                                 />
                                 <Text style={styles.noListsText}>
@@ -212,12 +220,13 @@ function Home({ navigation, route }: any) {
                         )
                     }
             </ScrollView>
+            
 
             <TouchableOpacity 
-                style={styles.deleteAllBtn} 
+                style={globalStyles.deleteBtn} 
                 onPress={deleteAlert}
                 activeOpacity={0.5}
-            >        
+            >
                 <MaterialIcon
                     name="delete-outline"
                     size={28}
@@ -225,7 +234,7 @@ function Home({ navigation, route }: any) {
                 />
             </TouchableOpacity>
 
-        </View>
+        </ImageBackground>
     );
 }
 
@@ -235,8 +244,8 @@ const styles = StyleSheet.create({
     },
 
     scrollView: {
-        backgroundColor: '#f0f0f0',
-        width: '100%',
+        backgroundColor: 'transparent',
+        width: '100%'
     },
 
     cardsContainer: {
@@ -246,61 +255,23 @@ const styles = StyleSheet.create({
     },
 
     noListsMessage: {
+        
         alignItems: 'center',
-        marginTop: 30
+        marginTop: '50%',
+
     },
 
     noListsText: {
         marginTop: 10,
         color: '#517aff',
-        
-    },
-
-    deleteAllBtn: {
-        backgroundColor: 'red',
-        padding: 15,
-        borderRadius: 50,
-        position: 'absolute',
-        bottom: 20,
-        right: 20,
-        shadowColor: '#000',
-        shadowRadius: 1,
-        elevation: 5
+        fontSize: 16
     },
 
     deleteBtnText: {
-        color: '#FFF',
+        color: WhiteColor,
         fontSize: 16,
         textAlign: 'center',
         flex: 1
-    },
-
-    text: {
-        fontSize: 20,
-        color: '#FFF'
-    },
-
-    icon: {
-        backgroundColor: '#517aff',
-        padding: 10,
-        borderRadius: 50,
-        shadowColor: '#000',
-        shadowRadius: 1,
-        elevation: 5
-    },
-
-    modal: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'flex-end',
-        position: 'absolute',
-        top: 0,
-        bottom: 0,
-        right: 0,
-        left: 0,
-        backgroundColor: 'dodgerblue',
-        padding: 24,
-        elevation: 5
     },
 
     inputBlock: {
@@ -311,27 +282,6 @@ const styles = StyleSheet.create({
     buttonBlock: {
         flexDirection: 'row',
     },
-
-    inputLabel: {
-        color: '#FFF',
-        fontSize: 14,
-        marginBottom: 4
-    },
-
-    newListNameInput: {
-        backgroundColor: '#FFF',
-        padding: 6,
-        borderRadius: 5,
-    },
-
-    minusIcon: {
-        backgroundColor: '#ff4848',
-    },
-
-    plusIcon: {
-        marginRight: 10,
-        backgroundColor: '#00e200'
-    }
 })
 
 export default Home;
