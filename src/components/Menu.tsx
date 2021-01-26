@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Animated } from 'react-native';
 
 import { WhiteColor } from '../styles/global';
 
@@ -13,6 +13,18 @@ import Icon from 'react-native-vector-icons/Feather';
 function Menu({ item, cards, card = {}, setCards, children }: any) {
 
     // Item can be a list, a list item and so on. It's just a name for the param.
+
+    // Animated API
+    const showAnim = new Animated.Value(-100);
+
+    const show = () => {
+        Animated.timing(showAnim, {
+            toValue: 0,
+            duration: 2000,
+            useNativeDriver: true
+        }).start()
+    }
+
 
     const deleteItem = () => {
         let newCards = [...cards];
@@ -37,8 +49,8 @@ function Menu({ item, cards, card = {}, setCards, children }: any) {
             setCards(newCards);
         }
         
-        saveToStorage(AsyncStorage, newCards);
-       
+        saveToStorage(AsyncStorage, newCards)
+
     }
 
     // There will always be a "delete" button in the Menu.

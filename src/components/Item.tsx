@@ -113,7 +113,6 @@ function Item({ itemArray, cardArray, items, setItems }: any) {
                         <TextInput
                             keyboardType="numeric"
                             maxLength={8}
-                            value={newItemPrice}
                             onChangeText={(text) => setNewItemPrice(Number(text))}
                             style={menuStyles.input}
                         />

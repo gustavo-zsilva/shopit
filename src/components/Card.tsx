@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
-import { View, Text, TouchableNativeFeedback, StyleSheet, TouchableOpacity, TextInput } from 'react-native';
+import { View, Text, TouchableNativeFeedback, StyleSheet, TouchableOpacity, TextInput, Animated } from 'react-native';
 
 import Menu, { styles as menuStyles } from '../components/Menu';
 
@@ -33,6 +33,39 @@ function Card({ card, cards, setCards, index, navigation }: CardProps) {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
 
     const [newCardName, setNewCardName] = useState(card.title);
+
+    // Animated API
+    const popAnim = useRef(new Animated.Value(0.9)).current;
+
+    const PopView = (props: any) => {
+        useEffect(() => {
+            Animated.sequence([
+                Animated.timing(popAnim, {
+                    toValue: 1.05,
+                    duration: 100,
+                    useNativeDriver: true
+                }),
+
+                Animated.timing(popAnim, {
+                    toValue: 1,
+                    
+                    duration: 600,
+                    useNativeDriver: true
+                }),
+            ]).start();
+
+            // Animated.timing(popAnim, {}).stop()
+        }, [popAnim])
+        
+        return (
+            <Animated.View
+            style={[styles.container, {marginBottom: index === cards.length - 1 ? 90 : 0, transform: [{ scale: popAnim }]}]}>
+                {props.children}
+            </Animated.View>
+        )
+
+    }
+
 
     const openList = () => {
         setIsMenuOpen(false);
@@ -79,7 +112,6 @@ function Card({ card, cards, setCards, index, navigation }: CardProps) {
                         </View>
                     </TouchableOpacity>
                 </Menu>}
-
             </View>
 
         </TouchableNativeFeedback>
@@ -91,6 +123,7 @@ const styles = StyleSheet.create({
     container: {
         backgroundColor: '#FFF',
         flexDirection: 'column',
+        alignSelf: 'center',
         width: '90%',
         marginTop: 20,
         borderRadius: 6,

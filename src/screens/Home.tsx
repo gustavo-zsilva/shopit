@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useRef} from 'react';
 
 import 'react-native-get-random-values';
 
@@ -19,7 +19,9 @@ import {
     Alert,
     TouchableNativeFeedback,
     TextInput,
-    ImageBackground
+    ImageBackground,
+    Animated,
+    FlatList
 } from 'react-native';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -193,33 +195,41 @@ function Home({ navigation }: any) {
            
 
             
-            <ScrollView contentContainerStyle={{alignItems: 'center'}} style={styles.scrollView}>          
-                    {
-                        cards.length > 0 ? (
-                            cards.map((card, index) => {
-                                return <Card
-                                    key={index}
-                                    card={card}
-                                    cards={cards}
-                                    setCards={setCards}
-                                    index={index}
-                                    navigation={navigation}
-                                />
-                            })
-                        ) : (
-                            <View style={styles.noListsMessage}>
-                                <Icon
-                                    name="moon"
-                                    size={44}
-                                    color="#517aff"
-                                />
-                                <Text style={styles.noListsText}>
-                                    Ainda não há listas aqui.
-                                </Text>
-                            </View>
-                        )
-                    }
-            </ScrollView>
+            {/* <ScrollView contentContainerStyle={{alignItems: 'center'}} style={styles.scrollView}>          
+                    
+            </ScrollView> */}
+            
+
+           
+            <FlatList
+                data={cards}
+                refreshing={false}
+                onRefresh={getCards}
+                
+                renderItem={({ item, index }) => (
+                    <Card
+                        key={index}
+                        card={item}
+                        cards={cards}
+                        setCards={setCards}
+                        index={index}
+                        navigation={navigation}
+                    />
+                )}
+                ListEmptyComponent={
+                    <View style={styles.noListsMessage}>
+                        <Icon
+                            name="moon"
+                            size={44}
+                            color="#517aff"
+                        />
+                        <Text style={styles.noListsText}>
+                            Ainda não há listas aqui.
+                        </Text>
+                    </View>
+                }
+            />
+           
             
 
             <TouchableOpacity 
@@ -243,9 +253,10 @@ const styles = StyleSheet.create({
         flex: 1
     },
 
-    scrollView: {
+    flatList: {
         backgroundColor: 'transparent',
-        width: '100%'
+        width: '100%',
+        
     },
 
     cardsContainer: {
