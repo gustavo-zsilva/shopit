@@ -130,7 +130,7 @@ function Home({ navigation }: any) {
 
     useEffect(() => {
         getCards();
-    }, [])
+    }, []);
 
     return (
         <ImageBackground source={require('../assets/shop-app-bg.png')} style={styles.container} >
@@ -205,7 +205,7 @@ function Home({ navigation }: any) {
                 data={cards}
                 refreshing={false}
                 onRefresh={getCards}
-                
+                keyboardShouldPersistTaps={'always'}
                 renderItem={({ item, index }) => (
                     <Card
                         key={index}

@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 
-import { View, Text, StyleSheet, TouchableOpacity, Animated } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Animated, Vibration } from 'react-native';
 
 import { WhiteColor } from '../styles/global';
 
@@ -11,6 +11,10 @@ import Icon from 'react-native-vector-icons/Feather';
 
 
 function Menu({ item, cards, card = {}, setCards, children }: any) {
+
+    useEffect(() => {
+        Vibration.vibrate(50);
+    }, [])
 
     // Item can be a list, a list item and so on. It's just a name for the param.
 

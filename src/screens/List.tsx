@@ -9,7 +9,7 @@ import {
     TextInput,
     Alert,
     ScrollView,
-    ImageBackground
+    ImageBackground,
 } from 'react-native';
 
 import { useNavigation } from '@react-navigation/native';
@@ -137,7 +137,7 @@ function List({ route }: any) {
 
         setItemName('');
         setItemPrice(0);
-        setIsModalOpen(false);
+        
     }
 
 
@@ -149,7 +149,7 @@ function List({ route }: any) {
     return (
 
         <ImageBackground source={require('../assets/shop-app-list-bg.png')} style={styles.container}>
-        <ScrollView>
+        <ScrollView keyboardShouldPersistTaps={'handled'}>
 
             {/* Header */}
             <Header>
@@ -194,6 +194,10 @@ function List({ route }: any) {
                                     style={globalStyles.input}
                                     value={itemName}
                                     onChangeText={(text) => setItemName(text)}
+                                    autoFocus={true}
+                                    maxLength={44}
+                                    returnKeyType="done"
+                                    blurOnSubmit={false}
                                 />
                             </View>
 
@@ -205,6 +209,7 @@ function List({ route }: any) {
                                     placeholder="0"
                                     style={globalStyles.input}
                                     keyboardType="numeric"
+                                    // value={itemPrice}
                                     onChangeText={(text) => {
                                         text.replace(/[^0-9]/g, '');
                                         text.replace(/./g, ',')

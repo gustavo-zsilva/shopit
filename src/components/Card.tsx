@@ -1,6 +1,15 @@
 import React, { useState, useEffect, useRef } from 'react';
 
-import { View, Text, TouchableNativeFeedback, StyleSheet, TouchableOpacity, TextInput, Animated } from 'react-native';
+import {
+    View,
+    Text,
+    TouchableNativeFeedback,
+    StyleSheet,
+    TouchableOpacity,
+    TextInput,
+    Animated,
+    Keyboard
+} from 'react-native';
 
 import Menu, { styles as menuStyles } from '../components/Menu';
 
@@ -82,6 +91,8 @@ function Card({ card, cards, setCards, index, navigation }: CardProps) {
         setCards(newCards);
 
         saveToStorage(AsyncStorage, newCards);
+
+        Keyboard.dismiss();
     }
 
     return (
