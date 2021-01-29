@@ -1,7 +1,7 @@
 import React, {useRef, useEffect} from 'react';
 import { View, StyleSheet, StatusBar, Animated } from 'react-native';
 
-function HeaderNew({ children, statusBar = true }: any) {
+function Header({ children, statusBar = true }: any) {
 
     // Animated API
     const showAnim = useRef(new Animated.Value(-100)).current;
@@ -48,4 +48,4 @@ const styles = StyleSheet.create({
     }
 })
 
-export default HeaderNew;
+export default Header;

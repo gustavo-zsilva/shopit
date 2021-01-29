@@ -12,9 +12,12 @@ import Icon from 'react-native-vector-icons/Feather';
 
 function Menu({ item, cards, card = {}, setCards, children }: any) {
 
+    let newCards = [...cards];
+    const indexOfId = newCards.indexOf(item);
+
     useEffect(() => {
         Vibration.vibrate(50);
-    }, [])
+    }, []);
 
     // Item can be a list, a list item and so on. It's just a name for the param.
 
@@ -31,13 +34,7 @@ function Menu({ item, cards, card = {}, setCards, children }: any) {
 
 
     const deleteItem = () => {
-        let newCards = [...cards];
-        
 
-        const indexOfId = newCards.indexOf(item);
-        // console.log('INDEX OF ID:: ', indexOfId);
-        
-        
         if (indexOfId < 0) {
             const indexOfCard = newCards.indexOf(card);
             
@@ -53,7 +50,7 @@ function Menu({ item, cards, card = {}, setCards, children }: any) {
             setCards(newCards);
         }
         
-        saveToStorage(AsyncStorage, newCards)
+        saveToStorage(AsyncStorage, newCards);
 
     }
 

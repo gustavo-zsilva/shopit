@@ -266,10 +266,8 @@ const styles = StyleSheet.create({
     },
 
     noListsMessage: {
-        
         alignItems: 'center',
         marginTop: '50%',
-
     },
 
     noListsText: {

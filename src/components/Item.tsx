@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 import CheckBox from '@react-native-community/checkbox';
 
@@ -21,7 +21,8 @@ function Item({ itemArray, cardArray, items, setItems }: any) {
 
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [newItemPrice, setNewItemPrice] = useState(item.price);
-    const [newItemTitle, setNewItemTitle] = useState(item.title)
+    const [newItemTitle, setNewItemTitle] = useState(item.title);
+    const [newItemUnities, setNewItemUnities] = useState(item.unities);
 
     const [toggleCheckBox, setToggleCheckBox] = useState(item.isCompleted);
     // const [] = useState()
@@ -43,6 +44,9 @@ function Item({ itemArray, cardArray, items, setItems }: any) {
     }
 
     const changeItemPrice = () => {
+
+        if (newItemPrice < 0) return;
+
         const newCards = [...cards];
         const indexOfCard = newCards.indexOf(card);
 
@@ -66,6 +70,22 @@ function Item({ itemArray, cardArray, items, setItems }: any) {
         newCards[indexOfCard].items = items;
 
         saveToStorage(AsyncStorage, newCards);
+    }
+
+    const changeItemUnities = () => {
+
+        if (newItemUnities <= 0) return;
+
+        const newCards = [...cards];
+        const indexOfCard = newCards.indexOf(card);
+
+        const newItems = [...items];
+        newItems[itemIndex].unities = newItemUnities;
+        setItems(newItems);
+
+        newCards[indexOfCard].items = items;
+
+        saveToStorage(AsyncStorage, newCards)
     }
 
     return (
@@ -92,16 +112,26 @@ function Item({ itemArray, cardArray, items, setItems }: any) {
                     <Text style={{ textDecorationLine: toggleCheckBox ? 'line-through' : 'none' }}>
                         {item.title}
                     </Text>
-                    {item.price !== 0 ? (
-                        <Text style={item.price}>R$ {item.price}</Text>
-                    ) : (
-                        <View style={item.price}>
-                            <Icon name="pricetags-outline" size={26} color="#b84e4e" />
-                        </View>
-                    )}
+
+                    <View style={styles.subInfo}>
+                        <Text style={styles.unities}>
+                            <Text style={{ fontSize: 12, color: 'gray' }}>
+                                x
+                            </Text>
+                            {item.unities}
+                        </Text>
+
+                        {item.price !== 0 ? (
+                            <Text style={item.price}>R$ {item.price}</Text>
+                        ) : (
+                            <View style={item.price}>
+                                <Icon name="pricetags-outline" size={26} color="#b84e4e" />
+                            </View>
+                        )}
+                    </View>
                 </View>
             </View>
-         
+            
             
             {isMenuOpen && <Menu item={item} cards={cards} card={card} setCards={setItems}>
                 <TouchableOpacity
@@ -114,6 +144,21 @@ function Item({ itemArray, cardArray, items, setItems }: any) {
                             keyboardType="numeric"
                             maxLength={8}
                             onChangeText={(text) => setNewItemPrice(Number(text))}
+                            style={menuStyles.input}
+                        />
+                    </View>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                    activeOpacity={0.6}
+                    onPress={changeItemUnities}
+                >
+                    <View style={menuStyles.button}>
+                        <Text style={menuStyles.text}>Unidades</Text>
+                        <TextInput
+                            keyboardType="numeric"
+                            maxLength={3}
+                            onChangeText={(text) => setNewItemUnities(text)}
                             style={menuStyles.input}
                         />
                     </View>
@@ -161,9 +206,24 @@ const styles = StyleSheet.create({
         alignItems: 'center'
     },
 
+    subInfo: {
+        flexDirection: 'row',
+        alignItems: 'center'
+    },
+
     price: {
         marginRight: 10,
     },
+
+    unities: {
+        marginRight: 10,
+        borderWidth: 1,
+        borderColor: PrimaryColor,
+        padding: 5,
+        paddingHorizontal: 10,
+        borderRadius: 4,
+        textAlign: 'center'
+    }
 })
 
 export default Item;

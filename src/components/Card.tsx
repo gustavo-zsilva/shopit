@@ -72,7 +72,6 @@ function Card({ card, cards, setCards, index, navigation }: CardProps) {
                 {props.children}
             </Animated.View>
         )
-
     }
 
 
@@ -83,6 +82,9 @@ function Card({ card, cards, setCards, index, navigation }: CardProps) {
     }
 
     const changeCardTitle = () => {
+
+        if (newCardName.length <= 0 ) return;
+
         const newCards = [...cards];
         const indexOfCard = newCards.indexOf(card);
 
@@ -91,8 +93,6 @@ function Card({ card, cards, setCards, index, navigation }: CardProps) {
         setCards(newCards);
 
         saveToStorage(AsyncStorage, newCards);
-
-        Keyboard.dismiss();
     }
 
     return (
@@ -110,14 +110,20 @@ function Card({ card, cards, setCards, index, navigation }: CardProps) {
                 {isMenuOpen && <Menu item={card} cards={cards} setCards={setCards}>
                     <TouchableOpacity
                         activeOpacity={0.6}
-                        onPress={changeCardTitle}
+                        onPress={() => {
+                            changeCardTitle();
+                            Keyboard.dismiss();
+                        }}
                     >
                         <View style={menuStyles.button}>
                             <Text style={menuStyles.text}>Mudar nome</Text>
 
                             <TextInput
                                 value={newCardName}
-                                onChangeText={(text) => setNewCardName(text)}
+                                onChangeText={(text) => {
+                                    setNewCardName(text);
+                                    changeCardTitle();
+                                }}
                                 style={menuStyles.input}
                             />
                         </View>

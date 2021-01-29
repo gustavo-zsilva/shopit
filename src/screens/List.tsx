@@ -36,6 +36,7 @@ interface Card {
         isCompleted: boolean;
         title: string;
         price: number;
+        unities: number;
     }[];
     id: string;
     createdAt: string;
@@ -54,15 +55,16 @@ function List({ route }: any) {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [itemName, setItemName] = useState('');
     const [itemPrice, setItemPrice] = useState(0);
+    const [itemUnities, setItemUnities] = useState(1);
 
     const newCard = {...card}
 
-    // Checked items array
+    // Completed items array
     let completedItems = items.filter(item => item.isCompleted);
 
     // Sum of completed items prices
     let pricesArray = completedItems
-        .map((item: any) => item.price)
+        .map((item: any) => item.price * item.unities)
         .reduce((accumulator: number, currentValue: number) => accumulator + currentValue, 0);
 
     const [itemsLeft, setItemsLeft] = useState(completedItems.length);
@@ -74,7 +76,7 @@ function List({ route }: any) {
         completedItems = items.filter(item => item.isCompleted);
    
         pricesArray = completedItems
-            .map((item: any) => item.price)
+            .map((item: any) => item.price * item.unities)
             .reduce((accumulator: number, currentValue: number) => accumulator + currentValue, 0);
 
         setItemsLeft(completedItems.length);
@@ -120,6 +122,7 @@ function List({ route }: any) {
         const newItem = {
             title: itemName,
             price: itemPrice,
+            unities: itemUnities,
             isCompleted: false,
             id: uuidv4()
         }
@@ -136,8 +139,6 @@ function List({ route }: any) {
         saveToStorage(AsyncStorage, newCards);
 
         setItemName('');
-        setItemPrice(0);
-        
     }
 
 
@@ -185,7 +186,7 @@ function List({ route }: any) {
                     isModalOpen && (
                         <View style={globalStyles.modal}>
 
-                            <View style={styles.inputBlock}>
+                            <View style={[styles.inputBlock, styles.bigInputBlock]}>
                                 <Text style={globalStyles.label}>
                                     Nome
                                 </Text>
@@ -195,7 +196,7 @@ function List({ route }: any) {
                                     value={itemName}
                                     onChangeText={(text) => setItemName(text)}
                                     autoFocus={true}
-                                    maxLength={44}
+                                    maxLength={38}
                                     returnKeyType="done"
                                     blurOnSubmit={false}
                                 />
@@ -216,6 +217,24 @@ function List({ route }: any) {
                                         return setItemPrice(Number(text));
                                     }}
                                     maxLength={8}
+                                />
+                            </View>
+
+                            <View style={styles.inputBlock}>
+                                <Text style={[globalStyles.label, styles.smallLabel]}>
+                                    Unidades
+                                </Text>
+                                <TextInput
+                                    placeholder="1"
+                                    style={globalStyles.input}
+                                    // value={itemUnities}
+                                    keyboardType="numeric"
+                                    onChangeText={(text) => {
+                                        text.replace(/[^0-9]/g, '');
+                                        text.replace(/./g, ',')
+                                        return setItemUnities(Number(text));
+                                    }}
+                                    maxLength={3}
                                 />
                             </View>
 
@@ -301,7 +320,7 @@ const styles = StyleSheet.create({
 
     headerText: {
         color: WhiteColor,
-        fontSize: 20
+        fontSize: 18
     },
 
     itemsLeft: {
@@ -310,7 +329,15 @@ const styles = StyleSheet.create({
 
     inputBlock: {
         flex: 1,
-        marginRight: 30
+        marginRight: 20
+    },
+
+    bigInputBlock: {
+        flex: 2
+    },
+
+    smallLabel: {
+        fontSize: 12
     },
 
     modalBtnContainer: {
