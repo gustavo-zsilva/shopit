@@ -1,36 +1,16 @@
 import React, {useRef, useEffect} from 'react';
 import { View, StyleSheet, StatusBar, Animated } from 'react-native';
 
+import SlideDown from '../animations/SlideDown';
+
 function Header({ children, statusBar = true }: any) {
 
-    // Animated API
-    const showAnim = useRef(new Animated.Value(-100)).current;
-
-    const ShowView = (props: any) => {
-        useEffect(() => {
-            Animated.timing(showAnim, {
-                toValue: 0,
-                // easing: Easing.back(),
-                duration: 300,
-                useNativeDriver: true
-            }).start();
-        })
-
-        return (
-            <Animated.View
-                style={[styles.header, {transform: [{translateY: showAnim}]}]}
-            >
-                {children}
-            </Animated.View>
-        )
-    }
-
     return (
-        <View style={[styles.header]}>
+        <SlideDown style={styles.header}>
             {statusBar && <StatusBar backgroundColor="dodgerblue" />}
 
             {children}
-        </View>
+        </SlideDown>
     );
 }
 

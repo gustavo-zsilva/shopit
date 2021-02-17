@@ -16,6 +16,8 @@ import Menu, { styles as menuStyles } from '../components/Menu';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import saveToStorage from '../utils/saveToStorage';
 
+import SlideSide from '../animations/SlideSide';
+
 interface CardProps {
     card: {
         title: string,
@@ -43,36 +45,6 @@ function Card({ card, cards, setCards, index, navigation }: CardProps) {
 
     const [newCardName, setNewCardName] = useState(card.title);
 
-    // Animated API
-    const popAnim = useRef(new Animated.Value(0.9)).current;
-
-    const PopView = (props: any) => {
-        useEffect(() => {
-            Animated.sequence([
-                Animated.timing(popAnim, {
-                    toValue: 1.05,
-                    duration: 100,
-                    useNativeDriver: true
-                }),
-
-                Animated.timing(popAnim, {
-                    toValue: 1,
-                    
-                    duration: 600,
-                    useNativeDriver: true
-                }),
-            ]).start();
-
-            // Animated.timing(popAnim, {}).stop()
-        }, [popAnim])
-        
-        return (
-            <Animated.View
-            style={[styles.container, {marginBottom: index === cards.length - 1 ? 90 : 0, transform: [{ scale: popAnim }]}]}>
-                {props.children}
-            </Animated.View>
-        )
-    }
 
 
     const openList = () => {
@@ -147,7 +119,7 @@ const styles = StyleSheet.create({
         shadowColor: '#000',
         shadowRadius: 1,
         shadowOpacity: 1,
-        elevation: 2
+        elevation: 2,
     },
 
     content: {

@@ -25,6 +25,7 @@ import MaterialIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 import Item from '../components/Item';
 import Header from '../components/Header';
+import SlideDown from '../animations/SlideDown';
 
 import { globalStyles, WhiteColor } from '../styles/global';
 import { iconStyles } from '../styles/icons';

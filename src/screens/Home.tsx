@@ -28,6 +28,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import Header from '../components/Header';
 import Card from '../components/Card';
+import SlideDown from '../animations/SlideDown';
 
 interface Data {
     title: string;
@@ -153,7 +154,7 @@ function Home({ navigation }: any) {
 
                 {
                     isModalOpen && (
-                        <View style={globalStyles.modal}>
+                        <SlideDown style={globalStyles.modal}>
                             <View style={styles.inputBlock}>
                                 <Text style={globalStyles.label}>Nome da lista</Text>
                                 <TextInput
@@ -187,7 +188,7 @@ function Home({ navigation }: any) {
                                 </TouchableNativeFeedback>
     
                             </View>
-                        </View>
+                        </SlideDown>
                     )
                 }
             </Header>

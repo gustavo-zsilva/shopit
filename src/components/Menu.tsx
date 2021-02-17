@@ -9,6 +9,8 @@ import saveToStorage from '../utils/saveToStorage';
 
 import Icon from 'react-native-vector-icons/Feather';
 
+import SlideDown from '../animations/SlideDown';
+
 
 function Menu({ item, cards, card = {}, setCards, children }: any) {
 
@@ -56,7 +58,7 @@ function Menu({ item, cards, card = {}, setCards, children }: any) {
 
     // There will always be a "delete" button in the Menu.
     return (
-        <View style={styles.container}>
+        <SlideDown style={styles.container} value={-30}>
 
             <TouchableOpacity
                 activeOpacity={0.6}
@@ -70,7 +72,7 @@ function Menu({ item, cards, card = {}, setCards, children }: any) {
             </TouchableOpacity>
 
             {children}
-        </View>
+        </SlideDown>
     );
 }
 
