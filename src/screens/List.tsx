@@ -298,7 +298,7 @@ function List({ route }: any) {
         </LinearGradient>
 
         <TouchableOpacity 
-            style={globalStyles.deleteBtn} 
+            style={globalStyles.deleteBtn}
             onPress={deleteAlert}
             activeOpacity={0.5}
         >
