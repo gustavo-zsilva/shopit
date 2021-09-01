@@ -53,6 +53,7 @@ function Item({ itemArray, cardArray, items, setItems }: any) {
         const newItems = [...items];
         newItems[itemIndex].price = newItemPrice;
         setItems(newItems);
+        setIsMenuOpen(false)
 
         newCards[indexOfCard].items = items;
 
@@ -66,6 +67,7 @@ function Item({ itemArray, cardArray, items, setItems }: any) {
         const newItems = [...items];
         newItems[itemIndex].title = newItemTitle;
         setItems(newItems);
+        setIsMenuOpen(false)
 
         newCards[indexOfCard].items = items;
 
@@ -82,6 +84,7 @@ function Item({ itemArray, cardArray, items, setItems }: any) {
         const newItems = [...items];
         newItems[itemIndex].unities = newItemUnities;
         setItems(newItems);
+        setIsMenuOpen(false)
 
         newCards[indexOfCard].items = items;
 

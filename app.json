@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "shop-app",
-    "slug": "shop-app",
+    "name": "Shopit",
+    "slug": "shopit",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./src/assets/icon.png",

@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useRef} from 'react';
+import React, {useState, useEffect} from 'react';
 
 import 'react-native-get-random-values';
 
@@ -30,108 +30,39 @@ import Header from '../components/Header';
 import Card from '../components/Card';
 import SlideDown from '../animations/SlideDown';
 
-interface Data {
-    title: string;
-    id: string;
-    createdAt: string;
-    items: Object[];
-}
-
 function Home({ navigation }: any) {
-
-    const [cards, setCards] = useState<Data[]>([])
-
-    // Header State
-    const [isModalOpen, setIsModalOpen] = useState(false);
 
     const [listName, setListName] = useState('');
 
-    const [isSaving, setIsSaving] = useState(false);
+    // const deleteAlert = () => {
 
+    //     if (cards.length <= 0) return;
 
-    // Pegar cards do AsyncStorage
-    const getCards = async () => {
-        try {
-            const response = await AsyncStorage.getItem('cards');
+    //     Alert.alert(
+    //         "Esta ação irá remover todas suas listas.",
+    //         "Deseja prosseguir?",
+    //         [
+    //             {
+    //                 text: "Sim",
+    //                 onPress: () => deleteAllLists(),
+    //                 style: 'destructive'
+    //             },
+    //             {
+    //                 text: "Voltar",
+    //                 style: 'cancel'
+    //             }
+    //         ]
+    //     )
+    // }
 
-            if (response === null) return;
-
-            const data = await JSON.parse(response);
-
-            setCards(data);
-            
-        } catch (err) {
-            console.error(err);
-        }
-    }
-
-    const addNewList = async () => {
-        if (listName === '') return;
-
-        try {
-            setIsSaving(true)
-
-            const newRegister = {
-                title: listName,
-                items: [],
-                id: uuidv4(),
-                createdAt: new Date().toLocaleDateString()
-            }
-
-            // Aqui o AsyncStorage não estava salvando o último item
-            // pois eu estava setando a variavel "cards" e depois 
-            // passando ela para salvar, porém ela não tinha terminado de salvar ainda
-            const newCards = [...cards, newRegister]
-
-            await AsyncStorage.setItem('cards', JSON.stringify(newCards));
-            setCards(newCards);
-            
-            setIsSaving(false)
-            setIsModalOpen(false)
-            setListName('')
-            
-        } catch (err) {
-            console.error(err);
-            
-            setIsSaving(false)
-            setIsModalOpen(false)
-            setListName('')
-        }
-    }
-
-    const deleteAlert = () => {
-
-        if (cards.length <= 0) return;
-
-        Alert.alert(
-            "Esta ação irá remover todas suas listas.",
-            "Deseja prosseguir?",
-            [
-                {
-                    text: "Sim",
-                    onPress: () => deleteAllLists(),
-                    style: 'destructive'
-                },
-                {
-                    text: "Voltar",
-                    style: 'cancel'
-                }
-            ]
-        )
-    }
-
-    const deleteAllLists = async () => {
-        try {
-            await AsyncStorage.clear();
-            setCards([]);
-        } catch (err) {
-            console.error(err);
-        }
-    }
-
-    useEffect(() => {
-        getCards();
-    }, []);
+    // const deleteAllLists = async () => {
+    //     try {
+    //         await AsyncStorage.clear();
+    //         setCards([]);
+    //     } catch (err) {
+    //         console.error(err);
+    //     }
+    // }
 
     return (
         <ImageBackground source={require('../assets/shop-app-bg.png')} style={styles.container} >
@@ -143,14 +74,6 @@ function Home({ navigation }: any) {
                         <Icon name="plus" size={32} color="#FFF" />
                     </View>
                 </TouchableNativeFeedback>
-
-                {
-                    isSaving && (
-                        <View style={{ backgroundColor: 'red' }}>
-                            <Text>Salvando...</Text>
-                        </View>
-                    )
-                }
 
                 {
                     isModalOpen && (
@@ -167,7 +90,7 @@ function Home({ navigation }: any) {
     
                             <View style={styles.buttonBlock}>
     
-                                <TouchableNativeFeedback onPress={addNewList}>
+                                <TouchableNativeFeedback>
                                     <View style={[iconStyles.icon, iconStyles.plusIcon]}>
                                         <Icon
                                             name="plus"
@@ -201,8 +124,7 @@ function Home({ navigation }: any) {
             </ScrollView> */}
             
 
-           
-            <FlatList
+            {/* <FlatList
                 data={cards}
                 refreshing={false}
                 onRefresh={getCards}
@@ -243,7 +165,7 @@ function Home({ navigation }: any) {
                     size={28}
                     color="#FFF"
                 />
-            </TouchableOpacity>
+            </TouchableOpacity> */}
 
         </ImageBackground>
     );
