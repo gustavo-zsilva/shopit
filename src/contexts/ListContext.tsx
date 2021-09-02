@@ -15,6 +15,7 @@ type ListsContextProps = {
     lists: List[],
     isModalOpen: boolean,
     addList: (newList: List) => void,
+    deleteList: (id: string) => void,
     getLists: () => Promise<void>,
     updateLists: (newLists: List[]) => void,
     clearLists: () => void,
@@ -33,13 +34,21 @@ export function ListsProvider({ children }: ListsProviderProps) {
     
     async function getLists() {
         const rawLists = await AsyncStorage.getItem('cards')
-        const lists = rawLists ? JSON.parse(rawLists) : null
-        setLists(lists)
+
+        if (rawLists !== null) {
+            const retrievedLists = JSON.parse(rawLists)
+            setLists(retrievedLists)
+        }
     }
 
     function addList(newList: List) {
         setLists([...lists, newList])
         setIsModalOpen(false)
+    }
+
+    function deleteList(id: string) {
+        const newLists = lists.filter(list => list.id !== id)
+        setLists(newLists)
     }
 
     function updateLists(newLists: List[]) {
@@ -91,6 +100,7 @@ export function ListsProvider({ children }: ListsProviderProps) {
             value={{
                 lists,
                 addList,
+                deleteList,
                 getLists,
                 updateLists,
                 clearLists,

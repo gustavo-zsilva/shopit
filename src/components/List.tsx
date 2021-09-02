@@ -12,7 +12,7 @@ import {
     Keyboard
 } from 'react-native';
 
-import Menu, { styles as menuStyles } from './Menu';
+import { Menu, styles as menuStyles } from './ListMenu';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import saveToStorage from '../utils/saveToStorage';
@@ -20,19 +20,18 @@ import saveToStorage from '../utils/saveToStorage';
 import SlideSide from '../animations/SlideSide';
 import { useLists } from '../hooks/useLists';
 
-interface CardProps {
+type ListProps = {
     id: string,
     title: string,
     createdAt: string,
 }
 
-export function List({ id, title, createdAt }: CardProps) {
+export function List({ id, title, createdAt }: ListProps) {
 
-    const { lists, updateLists } = useLists()
+    const { lists, updateLists, deleteList } = useLists()
     const { navigate } = useNavigation()
 
     const [isMenuOpen, setIsMenuOpen] = useState(false);
-    const [newListTitle, setNewListTitle] = useState(title);
 
     const openList = () => {
         setIsMenuOpen(false);
@@ -40,17 +39,7 @@ export function List({ id, title, createdAt }: CardProps) {
         navigate('List');
     }
 
-    const changeCardTitle = () => {
-
-        if (newListTitle.length <= 0) return;
-
-        const newLists = [...lists]
-        newLists.map(list => list.id === id ? list.title = newListTitle : null)
-
-        console.log(newLists)
-
-        updateLists(newLists)
-    }
+    
 
     return (
         
@@ -64,25 +53,7 @@ export function List({ id, title, createdAt }: CardProps) {
                     <Text style={styles.date}>{createdAt}</Text>
                 </View>
                 
-                {isMenuOpen && <Menu item={{ title, id, createdAt }}>
-                    <TouchableOpacity
-                        activeOpacity={0.6}
-                        onPress={() => {
-                            changeCardTitle();
-                            Keyboard.dismiss();
-                        }}
-                    >
-                        <View style={menuStyles.button}>
-                            <Text style={menuStyles.text}>Mudar nome</Text>
-
-                            <TextInput
-                                value={newListTitle}
-                                onChangeText={(text) => setNewListTitle(text)}
-                                style={menuStyles.input}
-                            />
-                        </View>
-                    </TouchableOpacity>
-                </Menu>}
+                {isMenuOpen && <Menu title={title} id={id} createdAt={createdAt} />}
             </View>
 
         </TouchableNativeFeedback>
