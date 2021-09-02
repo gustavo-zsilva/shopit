@@ -1,13 +1,11 @@
-import React, { ReactNode, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import {
     View,
     Text,
     StyleSheet,
     TouchableOpacity,
-    Animated,
     Vibration,
-    TouchableOpacityProps,
     Keyboard,
     TextInput
 } from 'react-native';
@@ -57,6 +55,7 @@ export function Menu({ id, title, createdAt }: MenuProps) {
                 onPress={handleDeleteList}
             >
                 <View style={styles.button}>
+                    <Icon name="chevron-right" size={24} color="#222" />
                     <Text style={styles.text}>Excluir</Text>
 
                     <Icon name="delete" size={26} color="#df0000" />
@@ -68,7 +67,10 @@ export function Menu({ id, title, createdAt }: MenuProps) {
                 onPress={handleChangeCardTitle}
             >
                 <View style={styles.button}>
-                    <Text style={styles.text}>Mudar nome</Text>
+                    <View style={{ backgroundColor: 'red' }}>
+                        <Icon name="chevron-right" size={24} color="#222" />
+                        <Text style={[styles.text, {backgroundColor: 'red'}]}>Mudar nome</Text>
+                    </View>
 
                     <TextInput
                         value={newListTitle}
@@ -84,29 +86,29 @@ export function Menu({ id, title, createdAt }: MenuProps) {
 export const styles = StyleSheet.create({
     container: {
         width: '100%',
-        backgroundColor: '#222',
+        backgroundColor: '#FFF',
         borderBottomLeftRadius: 8,
         borderBottomRightRadius: 8,
         padding: 8,
     },
 
     button: {
-        width: '90%',
+        // width: '90%',
         alignSelf: 'center',
         alignItems: 'center',
         justifyContent: 'space-between',
-        padding: 15,
-        borderTopColor: 'gray',
+        padding: 10,
+        // borderTopColor: 'gray',
         borderBottomColor: 'transparent',
         borderLeftColor: 'transparent',
         borderRightColor: 'transparent',
-        borderWidth: 1,
+        // borderWidth: 1,
         flexDirection: 'row',
         height: 60
     },
 
     text: {
-        color: WhiteColor,
+        color: '#222',
     },
 
     input: {

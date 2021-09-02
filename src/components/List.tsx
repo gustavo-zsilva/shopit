@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState } from 'react';
 import { useNavigation } from '@react-navigation/native'
 
 import {
@@ -6,19 +6,9 @@ import {
     Text,
     TouchableNativeFeedback,
     StyleSheet,
-    TouchableOpacity,
-    TextInput,
-    Animated,
-    Keyboard
 } from 'react-native';
 
-import { Menu, styles as menuStyles } from './ListMenu';
-
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import saveToStorage from '../utils/saveToStorage';
-
-import SlideSide from '../animations/SlideSide';
-import { useLists } from '../hooks/useLists';
+import { Menu } from './ListMenu';
 
 type ListProps = {
     id: string,
@@ -28,18 +18,13 @@ type ListProps = {
 
 export function List({ id, title, createdAt }: ListProps) {
 
-    const { lists, updateLists, deleteList } = useLists()
     const { navigate } = useNavigation()
-
     const [isMenuOpen, setIsMenuOpen] = useState(false);
 
     const openList = () => {
         setIsMenuOpen(false);
-
         navigate('List');
     }
-
-    
 
     return (
         
@@ -47,7 +32,7 @@ export function List({ id, title, createdAt }: ListProps) {
             onPress={openList}
             onLongPress={() => setIsMenuOpen(!isMenuOpen)}
         >
-            <View style={[styles.container]}>
+            <View style={styles.container}>
                 <View style={styles.content}>
                     <Text>{title}</Text>
                     <Text style={styles.date}>{createdAt}</Text>

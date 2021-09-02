@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 
 import CheckBox from '@react-native-community/checkbox';
 
-import Menu, { styles as menuStyles } from '../components/Menu';
+// import Menu, { styles as menuStyles } from '../components/Menu';
 
 import Icon from 'react-native-vector-icons/Ionicons';
 
