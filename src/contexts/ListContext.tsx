@@ -1,26 +1,32 @@
-import React from 'react'
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { createContext, ReactNode, useState, useEffect } from 'react';
+import React, { createContext, ReactNode, useState, useEffect } from 'react'
+import { Alert } from 'react-native'
+import AsyncStorage from "@react-native-async-storage/async-storage"
 
-export const CardsContext = createContext({} as CardsContextProps)
+export const ListsContext = createContext({} as ListsContextProps)
 
 type List = {
     id: string;
     title: string;
-    items: [];
-    createdAt: Date;
+    items: [] | never[];
+    createdAt: string;
 }
 
-type CardsContextProps = {
+type ListsContextProps = {
     lists: List[],
+    isModalOpen: boolean,
     addList: (newList: List) => void,
+    getLists: () => Promise<void>,
+    updateLists: (newLists: List[]) => void,
+    clearLists: () => void,
+    openModal: () => void,
+    closeModal: () => void,
 }
 
-type CardsProviderProps = {
+type ListsProviderProps = {
     children: ReactNode;
 }
 
-export function CardsProvider({ children }: CardsProviderProps) {
+export function ListsProvider({ children }: ListsProviderProps) {
 
     const [lists, setLists] = useState<List[]>([])
     const [isModalOpen, setIsModalOpen] = useState(false)
@@ -31,26 +37,69 @@ export function CardsProvider({ children }: CardsProviderProps) {
         setLists(lists)
     }
 
-    async function addList(newList: List) {
-        const newLists = [...lists, newList]
-        await AsyncStorage.setItem('cards', JSON.stringify(newLists))
-
-        setLists(newLists)
+    function addList(newList: List) {
+        setLists([...lists, newList])
         setIsModalOpen(false)
+    }
+
+    function updateLists(newLists: List[]) {
+        setLists(newLists)
+    }
+
+    function clearLists() {
+        if (lists.length <= 0) return;
+
+        Alert.alert(
+            "Esta ação irá remover todas suas listas.",
+            "Deseja prosseguir?",
+            [
+                {
+                    text: "Sim",
+                    onPress: () => setLists([]),
+                    style: 'destructive'
+                },
+                {
+                    text: "Voltar",
+                    style: 'cancel'
+                }
+            ]
+        )
+    }
+
+    function openModal() {
+        setIsModalOpen(true)
+    }
+
+    function closeModal() {
+        setIsModalOpen(false)
+    }
+
+    async function saveToAsyncStorage() {
+        await AsyncStorage.setItem('cards', JSON.stringify(lists))
     }
 
     useEffect(() => {
         getLists()
     }, [])
 
+    useEffect(() => {
+        saveToAsyncStorage()
+    }, [lists])
+
     return (
-        <CardsContext.Provider
+        <ListsContext.Provider
             value={{
                 lists,
                 addList,
+                getLists,
+                updateLists,
+                clearLists,
+                isModalOpen,
+                openModal,
+                closeModal,
             }}
         >
             {children}
-        </CardsContext.Provider>
+        </ListsContext.Provider>
     )
 }

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useNavigation } from '@react-navigation/native'
 
 import {
     View,
@@ -11,60 +12,44 @@ import {
     Keyboard
 } from 'react-native';
 
-import Menu, { styles as menuStyles } from '../components/Menu';
+import Menu, { styles as menuStyles } from './Menu';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import saveToStorage from '../utils/saveToStorage';
 
 import SlideSide from '../animations/SlideSide';
+import { useLists } from '../hooks/useLists';
 
 interface CardProps {
-    card: {
-        title: string,
-        id: string,
-        createdAt: string,
-        items: Object[],
-    };
-    cards: {
-        title: string,
-        id: string,
-        createdAt: string,
-        items: Object[],
-    }[];
-    setCards: Function;
-    index: Number;
-    navigation: {
-        push: Function,
-        goBack: Function,
-    };
+    id: string,
+    title: string,
+    createdAt: string,
 }
 
-function Card({ card, cards, setCards, index, navigation }: CardProps) {
+export function List({ id, title, createdAt }: CardProps) {
+
+    const { lists, updateLists } = useLists()
+    const { navigate } = useNavigation()
 
     const [isMenuOpen, setIsMenuOpen] = useState(false);
-
-    const [newCardName, setNewCardName] = useState(card.title);
-
-
+    const [newListTitle, setNewListTitle] = useState(title);
 
     const openList = () => {
         setIsMenuOpen(false);
 
-        navigation.push('List', { card, cards });
+        navigate('List');
     }
 
     const changeCardTitle = () => {
 
-        if (newCardName.length <= 0 ) return;
+        if (newListTitle.length <= 0) return;
 
-        const newCards = [...cards];
-        const indexOfCard = newCards.indexOf(card);
+        const newLists = [...lists]
+        newLists.map(list => list.id === id ? list.title = newListTitle : null)
 
-        newCards[indexOfCard].title = newCardName;
+        console.log(newLists)
 
-        setCards(newCards);
-
-        saveToStorage(AsyncStorage, newCards);
+        updateLists(newLists)
     }
 
     return (
@@ -73,13 +58,13 @@ function Card({ card, cards, setCards, index, navigation }: CardProps) {
             onPress={openList}
             onLongPress={() => setIsMenuOpen(!isMenuOpen)}
         >
-            <View style={[styles.container, {marginBottom: index === cards.length - 1 ? 90 : 0}]}>
+            <View style={[styles.container]}>
                 <View style={styles.content}>
-                    <Text>{card.title}</Text>
-                    <Text style={styles.date}>{card.createdAt}</Text>
+                    <Text>{title}</Text>
+                    <Text style={styles.date}>{createdAt}</Text>
                 </View>
                 
-                {isMenuOpen && <Menu item={card} cards={cards} setCards={setCards}>
+                {isMenuOpen && <Menu item={{ title, id, createdAt }}>
                     <TouchableOpacity
                         activeOpacity={0.6}
                         onPress={() => {
@@ -91,11 +76,8 @@ function Card({ card, cards, setCards, index, navigation }: CardProps) {
                             <Text style={menuStyles.text}>Mudar nome</Text>
 
                             <TextInput
-                                value={newCardName}
-                                onChangeText={(text) => {
-                                    setNewCardName(text);
-                                    changeCardTitle();
-                                }}
+                                value={newListTitle}
+                                onChangeText={(text) => setNewListTitle(text)}
                                 style={menuStyles.input}
                             />
                         </View>
@@ -132,5 +114,3 @@ const styles = StyleSheet.create({
         color: 'gray',
     }
 })
-
-export default Card;

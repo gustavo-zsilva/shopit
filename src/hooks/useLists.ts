@@ -1,6 +1,6 @@
 import { useContext } from "react";
-import { CardsContext } from "../contexts/ListContext";
+import { ListsContext } from "../contexts/ListContext";
 
-export function useCards() {
-    return useContext(CardsContext)
+export function useLists() {
+    return useContext(ListsContext)
 }

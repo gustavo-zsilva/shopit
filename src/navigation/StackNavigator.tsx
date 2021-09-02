@@ -27,7 +27,6 @@ function StackNavigator() {
         <NavigationContainer>
             <Navigator initialRouteName="Home" headerMode="none">
                 <Screen name="Home" component={Home} />
-
                 <Screen name="List" component={List} />
             </Navigator>
         </NavigationContainer>

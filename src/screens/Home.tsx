@@ -1,11 +1,11 @@
-import React, {useState, useEffect} from 'react';
+import React, { useState } from 'react';
 
 import 'react-native-get-random-values';
 
 import { globalStyles, WhiteColor, BgColor } from '../styles/global';
 import { iconStyles } from '../styles/icons';
 
-import { v4 as uuidv4 } from 'uuid';
+import { v4 as uuid } from 'uuid';
 
 import Icon from 'react-native-vector-icons/Feather';
 import MaterialIcon from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -27,49 +27,34 @@ import {
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import Header from '../components/Header';
-import Card from '../components/Card';
+import { List } from '../components/List';
 import SlideDown from '../animations/SlideDown';
+import { useLists } from '../hooks/useLists'
 
 function Home({ navigation }: any) {
 
     const [listName, setListName] = useState('');
+    const { lists, getLists, addList, clearLists, isModalOpen, openModal, closeModal } = useLists()
 
-    // const deleteAlert = () => {
+    function handleAddList() {
+        if (!listName) return
 
-    //     if (cards.length <= 0) return;
+        const newList = {
+            id: uuid(),
+            title: listName,
+            items: [],
+            createdAt: new Date().toLocaleDateString(),
+        }
 
-    //     Alert.alert(
-    //         "Esta ação irá remover todas suas listas.",
-    //         "Deseja prosseguir?",
-    //         [
-    //             {
-    //                 text: "Sim",
-    //                 onPress: () => deleteAllLists(),
-    //                 style: 'destructive'
-    //             },
-    //             {
-    //                 text: "Voltar",
-    //                 style: 'cancel'
-    //             }
-    //         ]
-    //     )
-    // }
-
-    // const deleteAllLists = async () => {
-    //     try {
-    //         await AsyncStorage.clear();
-    //         setCards([]);
-    //     } catch (err) {
-    //         console.error(err);
-    //     }
-    // }
+        addList(newList)
+    }
 
     return (
         <ImageBackground source={require('../assets/shop-app-bg.png')} style={styles.container} >
 
             <Header>
                 <Text style={globalStyles.text}>Suas Listas</Text>
-                <TouchableNativeFeedback onPress={() => setIsModalOpen(true)}>
+                <TouchableNativeFeedback onPress={openModal}>
                     <View style={iconStyles.icon}>
                         <Icon name="plus" size={32} color="#FFF" />
                     </View>
@@ -90,7 +75,7 @@ function Home({ navigation }: any) {
     
                             <View style={styles.buttonBlock}>
     
-                                <TouchableNativeFeedback>
+                                <TouchableNativeFeedback onPress={handleAddList}>
                                     <View style={[iconStyles.icon, iconStyles.plusIcon]}>
                                         <Icon
                                             name="plus"
@@ -100,7 +85,7 @@ function Home({ navigation }: any) {
                                     </View>
                                 </TouchableNativeFeedback>
                                 
-                                <TouchableNativeFeedback onPress={() => setIsModalOpen(false)}>
+                                <TouchableNativeFeedback onPress={closeModal}>
                                     <View style={[iconStyles.icon, iconStyles.minusIcon]}>
                                         <Icon
                                             name="minus"
@@ -124,19 +109,17 @@ function Home({ navigation }: any) {
             </ScrollView> */}
             
 
-            {/* <FlatList
-                data={cards}
+            <FlatList
+                data={lists}
                 refreshing={false}
-                onRefresh={getCards}
+                onRefresh={getLists}
                 keyboardShouldPersistTaps={'always'}
-                renderItem={({ item, index }) => (
-                    <Card
-                        key={index}
-                        card={item}
-                        cards={cards}
-                        setCards={setCards}
-                        index={index}
-                        navigation={navigation}
+                renderItem={({ item }) => (
+                    <List
+                        key={item.id}
+                        title={item.title}
+                        id={item.id}
+                        createdAt={item.createdAt}
                     />
                 )}
                 ListEmptyComponent={
@@ -155,9 +138,9 @@ function Home({ navigation }: any) {
            
             
 
-            <TouchableOpacity 
+            <TouchableOpacity
                 style={globalStyles.deleteBtn} 
-                onPress={deleteAlert}
+                onPress={clearLists}
                 activeOpacity={0.5}
             >
                 <MaterialIcon
@@ -165,7 +148,7 @@ function Home({ navigation }: any) {
                     size={28}
                     color="#FFF"
                 />
-            </TouchableOpacity> */}
+            </TouchableOpacity>
 
         </ImageBackground>
     );
