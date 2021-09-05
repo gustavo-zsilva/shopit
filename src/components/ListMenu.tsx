@@ -21,13 +21,14 @@ type MenuProps = {
     id: string,
     title: string,
     createdAt: string,
+    closeMenu: () => void,
 }
 
-export function Menu({ id, title, createdAt }: MenuProps) {
+export function Menu({ id, title, createdAt, closeMenu }: MenuProps) {
 
     const { lists, updateLists, deleteList } = useLists()
     const [newListTitle, setNewListTitle] = useState(title);
-
+    
     useEffect(() => {
         Vibration.vibrate(50);
     }, []);
@@ -39,6 +40,7 @@ export function Menu({ id, title, createdAt }: MenuProps) {
         newLists.map(list => list.id === id ? list.title = newListTitle : null)
 
         updateLists(newLists)
+        closeMenu()
         Keyboard.dismiss()
     }
 
@@ -46,17 +48,17 @@ export function Menu({ id, title, createdAt }: MenuProps) {
         deleteList(id)
     }
 
-    // There will always be a "delete" button in the Menu.
     return (
         <SlideDown style={styles.container} value={-30}>
-
             <TouchableOpacity
                 activeOpacity={0.6}
                 onPress={handleDeleteList}
             >
                 <View style={styles.button}>
-                    <Icon name="chevron-right" size={24} color="#222" />
-                    <Text style={styles.text}>Excluir</Text>
+                    <View style={styles.buttonPlaceholder}>
+                        <Icon name="chevron-right" size={24} color="#222" />
+                        <Text style={styles.text}>Excluir</Text>
+                    </View>
 
                     <Icon name="delete" size={26} color="#df0000" />
                 </View>
@@ -67,9 +69,9 @@ export function Menu({ id, title, createdAt }: MenuProps) {
                 onPress={handleChangeCardTitle}
             >
                 <View style={styles.button}>
-                    <View style={{ backgroundColor: 'red' }}>
+                    <View style={styles.buttonPlaceholder}>
                         <Icon name="chevron-right" size={24} color="#222" />
-                        <Text style={[styles.text, {backgroundColor: 'red'}]}>Mudar nome</Text>
+                        <Text style={styles.text}>Mudar nome</Text>
                     </View>
 
                     <TextInput
@@ -83,7 +85,7 @@ export function Menu({ id, title, createdAt }: MenuProps) {
     );
 }
 
-export const styles = StyleSheet.create({
+const styles = StyleSheet.create({
     container: {
         width: '100%',
         backgroundColor: '#FFF',
@@ -93,26 +95,26 @@ export const styles = StyleSheet.create({
     },
 
     button: {
-        // width: '90%',
-        alignSelf: 'center',
         alignItems: 'center',
         justifyContent: 'space-between',
         padding: 10,
-        // borderTopColor: 'gray',
-        borderBottomColor: 'transparent',
-        borderLeftColor: 'transparent',
-        borderRightColor: 'transparent',
-        // borderWidth: 1,
         flexDirection: 'row',
         height: 60
     },
 
+    buttonPlaceholder: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+
     text: {
         color: '#222',
+        fontWeight: '700',
     },
 
     input: {
-        backgroundColor: WhiteColor,
+        backgroundColor: '#222',
+        color: WhiteColor,
         width: 120,
         padding: 4,
         borderRadius: 4

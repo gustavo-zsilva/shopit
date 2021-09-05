@@ -19,10 +19,7 @@ function Item({ itemArray, cardArray, items, setItems }: any) {
     const [item, itemIndex] = itemArray;
     const [cards, card] = cardArray;
 
-    const [isMenuOpen, setIsMenuOpen] = useState(false);
-    const [newItemPrice, setNewItemPrice] = useState(item.price);
-    const [newItemTitle, setNewItemTitle] = useState(item.title);
-    const [newItemUnities, setNewItemUnities] = useState(item.unities);
+    
 
     const [toggleCheckBox, setToggleCheckBox] = useState(item.isCompleted);
     // const [] = useState()
@@ -43,53 +40,11 @@ function Item({ itemArray, cardArray, items, setItems }: any) {
         saveToStorage(AsyncStorage, newCards);
     }
 
-    const changeItemPrice = () => {
+    
 
-        if (newItemPrice < 0) return;
+    
 
-        const newCards = [...cards];
-        const indexOfCard = newCards.indexOf(card);
-
-        const newItems = [...items];
-        newItems[itemIndex].price = newItemPrice;
-        setItems(newItems);
-        setIsMenuOpen(false)
-
-        newCards[indexOfCard].items = items;
-
-        saveToStorage(AsyncStorage, newCards);
-    }
-
-    const changeItemName = () => {
-        const newCards = [...cards];
-        const indexOfCard = newCards.indexOf(card);
-        
-        const newItems = [...items];
-        newItems[itemIndex].title = newItemTitle;
-        setItems(newItems);
-        setIsMenuOpen(false)
-
-        newCards[indexOfCard].items = items;
-
-        saveToStorage(AsyncStorage, newCards);
-    }
-
-    const changeItemUnities = () => {
-
-        if (newItemUnities <= 0) return;
-
-        const newCards = [...cards];
-        const indexOfCard = newCards.indexOf(card);
-
-        const newItems = [...items];
-        newItems[itemIndex].unities = newItemUnities;
-        setItems(newItems);
-        setIsMenuOpen(false)
-
-        newCards[indexOfCard].items = items;
-
-        saveToStorage(AsyncStorage, newCards)
-    }
+    
 
     return (
         <TouchableOpacity
@@ -136,7 +91,7 @@ function Item({ itemArray, cardArray, items, setItems }: any) {
             </View>
             
             
-            {isMenuOpen && <Menu item={item} cards={cards} card={card} setCards={setItems}>
+            {isMenuOpen && <Menu>
                 <TouchableOpacity
                     activeOpacity={0.6}
                     onPress={changeItemPrice}

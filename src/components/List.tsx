@@ -9,25 +9,29 @@ import {
 } from 'react-native';
 
 import { Menu } from './ListMenu';
+import { useLists } from '../hooks/useLists';
 
 type ListProps = {
     id: string,
-    title: string,
-    createdAt: string,
 }
 
-export function List({ id, title, createdAt }: ListProps) {
+export function List({ id }: ListProps) {
 
     const { navigate } = useNavigation()
+    const { lists } = useLists()
+    const list = lists.find(list => list.id === id)
     const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-    const openList = () => {
-        setIsMenuOpen(false);
-        navigate('List');
+    function openList() {
+        setIsMenuOpen(false)
+        navigate('List', { list })
+    }
+
+    function closeMenu() {
+        setIsMenuOpen(false)
     }
 
     return (
-        
         <TouchableNativeFeedback 
             onPress={openList}
             onLongPress={() => setIsMenuOpen(!isMenuOpen)}
@@ -38,7 +42,7 @@ export function List({ id, title, createdAt }: ListProps) {
                     <Text style={styles.date}>{createdAt}</Text>
                 </View>
                 
-                {isMenuOpen && <Menu title={title} id={id} createdAt={createdAt} />}
+                {isMenuOpen && <Menu title={title} id={id} createdAt={createdAt} closeMenu={closeMenu} />}
             </View>
 
         </TouchableNativeFeedback>

@@ -26,9 +26,11 @@ import MaterialIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 import Item from '../components/Item';
 import Header from '../components/Header';
 import SlideDown from '../animations/SlideDown';
+import { ItemProvider } from '../contexts/ItemContext'
 
 import { globalStyles, WhiteColor } from '../styles/global';
 import { iconStyles } from '../styles/icons';
+import { useLists } from '../hooks/useLists';
 
 interface Card {
     title: string;
@@ -46,19 +48,20 @@ interface Card {
 function List({ route }: any) {
 
     const navigation = useNavigation();
+    const { lists } = useLists()
+    const { list } = route.params;
 
-    const card: Card = route.params.card;
-    const cards = route.params.cards;
-    
-    const [items, setItems] = useState([...card.items]);
+    const [items, setItems] = useState(list.items);
+    console.log('List: ', list)
+    console.log('Lists: ', lists)
     
 
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [itemName, setItemName] = useState('');
-    const [itemPrice, setItemPrice] = useState(0);
-    const [itemUnities, setItemUnities] = useState(1);
+    // const [itemName, setItemName] = useState('');
+    // const [itemPrice, setItemPrice] = useState(0);
+    // const [itemUnities, setItemUnities] = useState(1);
 
-    const newCard = {...card}
+    // const newCard = {...card}
 
     // Completed items array
     let completedItems = items.filter(item => item.isCompleted);
@@ -149,168 +152,168 @@ function List({ route }: any) {
     
 
     return (
+        <ItemProvider list={list}>
+            <ImageBackground source={require('../assets/shop-app-list-bg.png')} style={styles.container}>
+            <ScrollView keyboardShouldPersistTaps={'handled'}>
 
-        <ImageBackground source={require('../assets/shop-app-list-bg.png')} style={styles.container}>
-        <ScrollView keyboardShouldPersistTaps={'handled'}>
-
-            {/* Header */}
-            <Header>
-                <TouchableNativeFeedback onPress={() => navigation.goBack()}>
-                    <View style={iconStyles.icon}>
-                        <Icon
-                            name="arrow-left"
-                            size={32}
-                            color="#FFF"
-                        />
-                    </View>
-                </TouchableNativeFeedback>
-
-                <Text style={styles.headerText}>
-                    {card.title}
-                </Text>
-
-                <Text style={[styles.headerText, styles.itemsLeft]}>
-                    {itemsLeft}/{items.length}
-                </Text>
-
-                <TouchableOpacity onPress={() => setIsModalOpen(true)}>
-                    <View style={iconStyles.icon}>
-                        <Icon
-                            name="plus"
-                            size={32}
-                            color="#FFF"
-                        />
-                    </View>
-                </TouchableOpacity>
-
-                {
-                    isModalOpen && (
-                        <View style={globalStyles.modal}>
-
-                            <View style={[styles.inputBlock, styles.bigInputBlock]}>
-                                <Text style={globalStyles.label}>
-                                    Nome
-                                </Text>
-                                <TextInput
-                                    placeholder="ex: Cebola"
-                                    style={globalStyles.input}
-                                    value={itemName}
-                                    onChangeText={(text) => setItemName(text)}
-                                    autoFocus={true}
-                                    maxLength={38}
-                                    returnKeyType="done"
-                                    blurOnSubmit={false}
-                                />
-                            </View>
-
-                            <View style={styles.inputBlock}>
-                                <Text style={globalStyles.label}>
-                                    R$
-                                </Text>
-                                <TextInput
-                                    placeholder="0"
-                                    style={globalStyles.input}
-                                    keyboardType="numeric"
-                                    // value={itemPrice}
-                                    onChangeText={(text) => {
-                                        text.replace(/[^0-9]/g, '');
-                                        text.replace(/./g, ',')
-                                        return setItemPrice(Number(text));
-                                    }}
-                                    maxLength={8}
-                                />
-                            </View>
-
-                            <View style={styles.inputBlock}>
-                                <Text style={[globalStyles.label, styles.smallLabel]}>
-                                    Unidades
-                                </Text>
-                                <TextInput
-                                    placeholder="1"
-                                    style={globalStyles.input}
-                                    // value={itemUnities}
-                                    keyboardType="numeric"
-                                    onChangeText={(text) => {
-                                        text.replace(/[^0-9]/g, '');
-                                        text.replace(/./g, ',')
-                                        return setItemUnities(Number(text));
-                                    }}
-                                    maxLength={3}
-                                />
-                            </View>
-
-                            <View style={styles.modalBtnContainer}>
-
-                                <TouchableNativeFeedback onPress={addNewItem}>
-                                    <View style={[iconStyles.icon, iconStyles.plusIcon]}>
-                                        <Icon
-                                            name="plus"
-                                            size={32}
-                                            color="#FFF"
-                                        />
-                                    </View>
-                                </TouchableNativeFeedback>
-
-                                <TouchableNativeFeedback onPress={() => setIsModalOpen(false)}>
-                                    <View style={[iconStyles.icon, iconStyles.minusIcon]}>
-                                        <Icon
-                                            name="minus"
-                                            size={32}
-                                            color="#FFF"
-                                        />
-                                    </View>
-                                </TouchableNativeFeedback>
-
-                            </View>
+                {/* Header */}
+                <Header>
+                    <TouchableNativeFeedback onPress={() => navigation.goBack()}>
+                        <View style={iconStyles.icon}>
+                            <Icon
+                                name="arrow-left"
+                                size={32}
+                                color="#FFF"
+                            />
                         </View>
-                    )
-                }
-            </Header>
+                    </TouchableNativeFeedback>
 
-            <View style={styles.listContainer}>
-                {
-                    items.map((item: any, index) => {
-                        return <Item
-                            key={index}
-                            itemArray={[item, index]}
-                            cardArray={[cards, card]}
-                            refreshStates={refreshStates}
-                            items={items}
-                            setItems={setItems}
-                        />
-                    })
-                }
-            </View>
-        </ScrollView>
+                    <Text style={styles.headerText}>
+                        {list.title}
+                    </Text>
 
-        <LinearGradient
-            colors={['#FFF', 'transparent']}
-            style={styles.totalPrice}
-            start={{ x: 0.2, y: 0 }}
-            end={{ x: 1, y: 0 }}
-        >
-            <Text style={styles.totalPriceText}>
-                R$ {" "}
-                <Text style={styles.totalPriceNumber}>
-                    {completedItemsPrice.toFixed(2)}
+                    <Text style={[styles.headerText, styles.itemsLeft]}>
+                        {itemsLeft}/{items.length}
+                    </Text>
+
+                    <TouchableOpacity onPress={() => setIsModalOpen(true)}>
+                        <View style={iconStyles.icon}>
+                            <Icon
+                                name="plus"
+                                size={32}
+                                color="#FFF"
+                            />
+                        </View>
+                    </TouchableOpacity>
+
+                    {
+                        isModalOpen && (
+                            <View style={globalStyles.modal}>
+
+                                <View style={[styles.inputBlock, styles.bigInputBlock]}>
+                                    <Text style={globalStyles.label}>
+                                        Nome
+                                    </Text>
+                                    <TextInput
+                                        placeholder="ex: Cebola"
+                                        style={globalStyles.input}
+                                        value={itemName}
+                                        onChangeText={(text) => setItemName(text)}
+                                        autoFocus={true}
+                                        maxLength={38}
+                                        returnKeyType="done"
+                                        blurOnSubmit={false}
+                                    />
+                                </View>
+
+                                <View style={styles.inputBlock}>
+                                    <Text style={globalStyles.label}>
+                                        R$
+                                    </Text>
+                                    <TextInput
+                                        placeholder="0"
+                                        style={globalStyles.input}
+                                        keyboardType="numeric"
+                                        // value={itemPrice}
+                                        onChangeText={(text) => {
+                                            text.replace(/[^0-9]/g, '');
+                                            text.replace(/./g, ',')
+                                            return setItemPrice(Number(text));
+                                        }}
+                                        maxLength={8}
+                                    />
+                                </View>
+
+                                <View style={styles.inputBlock}>
+                                    <Text style={[globalStyles.label, styles.smallLabel]}>
+                                        Unidades
+                                    </Text>
+                                    <TextInput
+                                        placeholder="1"
+                                        style={globalStyles.input}
+                                        // value={itemUnities}
+                                        keyboardType="numeric"
+                                        onChangeText={(text) => {
+                                            text.replace(/[^0-9]/g, '');
+                                            text.replace(/./g, ',')
+                                            return setItemUnities(Number(text));
+                                        }}
+                                        maxLength={3}
+                                    />
+                                </View>
+
+                                <View style={styles.modalBtnContainer}>
+
+                                    <TouchableNativeFeedback onPress={addNewItem}>
+                                        <View style={[iconStyles.icon, iconStyles.plusIcon]}>
+                                            <Icon
+                                                name="plus"
+                                                size={32}
+                                                color="#FFF"
+                                            />
+                                        </View>
+                                    </TouchableNativeFeedback>
+
+                                    <TouchableNativeFeedback onPress={() => setIsModalOpen(false)}>
+                                        <View style={[iconStyles.icon, iconStyles.minusIcon]}>
+                                            <Icon
+                                                name="minus"
+                                                size={32}
+                                                color="#FFF"
+                                            />
+                                        </View>
+                                    </TouchableNativeFeedback>
+
+                                </View>
+                            </View>
+                        )
+                    }
+                </Header>
+
+                <View style={styles.listContainer}>
+                    {
+                        items.map((item: any, index) => {
+                            return <Item
+                                key={index}
+                                itemArray={[item, index]}
+                                cardArray={[cards, card]}
+                                refreshStates={refreshStates}
+                                items={items}
+                                setItems={setItems}
+                            />
+                        })
+                    }
+                </View>
+            </ScrollView>
+
+            <LinearGradient
+                colors={['#FFF', 'transparent']}
+                style={styles.totalPrice}
+                start={{ x: 0.2, y: 0 }}
+                end={{ x: 1, y: 0 }}
+            >
+                <Text style={styles.totalPriceText}>
+                    R$ {" "}
+                    <Text style={styles.totalPriceNumber}>
+                        {completedItemsPrice.toFixed(2)}
+                    </Text>
                 </Text>
-            </Text>
-        </LinearGradient>
+            </LinearGradient>
 
-        <TouchableOpacity 
-            style={globalStyles.deleteBtn}
-            onPress={deleteAlert}
-            activeOpacity={0.5}
-        >
-            <MaterialIcon
-                name="delete-outline"
-                size={28}
-                color="#FFF"
-            />
-        </TouchableOpacity>
+            <TouchableOpacity 
+                style={globalStyles.deleteBtn}
+                onPress={deleteAlert}
+                activeOpacity={0.5}
+            >
+                <MaterialIcon
+                    name="delete-outline"
+                    size={28}
+                    color="#FFF"
+                />
+            </TouchableOpacity>
 
-        </ImageBackground>
-
+            </ImageBackground>
+        </ItemProvider>
     );
 }
 

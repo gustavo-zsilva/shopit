@@ -101,14 +101,6 @@ function Home({ navigation }: any) {
                 }
             </Header>
 
-           
-
-            
-            {/* <ScrollView contentContainerStyle={{alignItems: 'center'}} style={styles.scrollView}>          
-                    
-            </ScrollView> */}
-            
-
             <FlatList
                 data={lists}
                 refreshing={false}
@@ -117,9 +109,7 @@ function Home({ navigation }: any) {
                 renderItem={({ item }) => (
                     <List
                         key={item.id}
-                        title={item.title}
                         id={item.id}
-                        createdAt={item.createdAt}
                     />
                 )}
                 ListEmptyComponent={
@@ -135,8 +125,6 @@ function Home({ navigation }: any) {
                     </View>
                 }
             />
-           
-            
 
             <TouchableOpacity
                 style={globalStyles.deleteBtn} 
@@ -156,7 +144,7 @@ function Home({ navigation }: any) {
 
 const styles = StyleSheet.create({
     container: {
-        flex: 1
+        flex: 1,
     },
 
     flatList: {
