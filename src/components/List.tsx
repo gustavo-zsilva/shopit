@@ -12,15 +12,17 @@ import { Menu } from './ListMenu';
 import { useLists } from '../hooks/useLists';
 
 type ListProps = {
+    title: string,
+    createdAt: string,
     id: string,
 }
 
-export function List({ id }: ListProps) {
+export function List({ title, createdAt, id }: ListProps) {
 
     const { navigate } = useNavigation()
     const { lists } = useLists()
     const list = lists.find(list => list.id === id)
-    const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const [isMenuOpen, setIsMenuOpen] = useState(false)
 
     function openList() {
         setIsMenuOpen(false)

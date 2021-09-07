@@ -57,9 +57,9 @@ function List({ route }: any) {
     
 
     const [isModalOpen, setIsModalOpen] = useState(false);
-    // const [itemName, setItemName] = useState('');
-    // const [itemPrice, setItemPrice] = useState(0);
-    // const [itemUnities, setItemUnities] = useState(1);
+    const [itemName, setItemName] = useState('');
+    const [itemPrice, setItemPrice] = useState(0);
+    const [itemUnities, setItemUnities] = useState(1);
 
     // const newCard = {...card}
 
@@ -87,42 +87,10 @@ function List({ route }: any) {
         setCompletedItemsPrice(pricesArray);
     }
 
-    
-    const deleteAlert = () => {
 
-        if (cards.length <= 0) return;
-
-        Alert.alert(
-            "Esta ação irá remover todas suas listas.",
-            "Deseja prosseguir?",
-            [
-                {
-                    text: "Sim",
-                    onPress: () => deleteAllItems(),
-                    style: 'destructive'
-                },
-                {
-                    text: "Voltar",
-                    style: 'cancel'
-                }
-            ]
-        )
-    }
-
-    const deleteAllItems = () => {
-        const newCards = [...cards];
-        const cardIndex = newCards.indexOf(card);
-
-        setItems([]);
-        newCards[cardIndex].items = [];
-        
-        saveToStorage(AsyncStorage, newCards);
-    }
-
-
-    const addNewItem = () => {
+    function handleAddItem() {
         if (itemName === '') return;
-
+        
         const newItem = {
             title: itemName,
             price: itemPrice,
@@ -130,19 +98,6 @@ function List({ route }: any) {
             isCompleted: false,
             id: uuidv4()
         }
-
-        // Copy the cards array
-        const newCards = [...cards];
-
-        const indexOfCard = cards.indexOf(card);
-        newCards[indexOfCard].items.push(newItem);
-
-        // Grab the index of the current card, then push the new Item to the card's item array
-        setItems(newCards[indexOfCard].items);
-
-        saveToStorage(AsyncStorage, newCards);
-
-        setItemName('');
     }
 
 
@@ -244,7 +199,7 @@ function List({ route }: any) {
 
                                 <View style={styles.modalBtnContainer}>
 
-                                    <TouchableNativeFeedback onPress={addNewItem}>
+                                    {/* <TouchableNativeFeedback onPress={addNewItem}>
                                         <View style={[iconStyles.icon, iconStyles.plusIcon]}>
                                             <Icon
                                                 name="plus"
@@ -252,7 +207,7 @@ function List({ route }: any) {
                                                 color="#FFF"
                                             />
                                         </View>
-                                    </TouchableNativeFeedback>
+                                    </TouchableNativeFeedback> */}
 
                                     <TouchableNativeFeedback onPress={() => setIsModalOpen(false)}>
                                         <View style={[iconStyles.icon, iconStyles.minusIcon]}>
@@ -271,7 +226,7 @@ function List({ route }: any) {
                 </Header>
 
                 <View style={styles.listContainer}>
-                    {
+                    {/* {
                         items.map((item: any, index) => {
                             return <Item
                                 key={index}
@@ -282,7 +237,7 @@ function List({ route }: any) {
                                 setItems={setItems}
                             />
                         })
-                    }
+                    } */}
                 </View>
             </ScrollView>
 
@@ -302,7 +257,7 @@ function List({ route }: any) {
 
             <TouchableOpacity 
                 style={globalStyles.deleteBtn}
-                onPress={deleteAlert}
+                // onPress={deleteAlert}
                 activeOpacity={0.5}
             >
                 <MaterialIcon

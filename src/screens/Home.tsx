@@ -109,7 +109,9 @@ function Home({ navigation }: any) {
                 renderItem={({ item }) => (
                     <List
                         key={item.id}
+                        title={item.title}
                         id={item.id}
+                        createdAt={item.createdAt}
                     />
                 )}
                 ListEmptyComponent={

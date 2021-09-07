@@ -7,7 +7,6 @@ export const ListsContext = createContext({} as ListsContextProps)
 type List = {
     id: string;
     title: string;
-    items: [] | never[];
     createdAt: string;
 }
 
@@ -36,14 +35,21 @@ export function ListsProvider({ children }: ListsProviderProps) {
         const rawLists = await AsyncStorage.getItem('cards')
 
         if (rawLists !== null) {
-            const retrievedLists = JSON.parse(rawLists)
-            setLists(retrievedLists)
+            const parsedLists = JSON.parse(rawLists)
+            setLists(parsedLists)
         }
     }
 
-    function addList(newList: List) {
+    async function addList(newList: List) {
         setLists([...lists, newList])
         setIsModalOpen(false)
+        const listItems = {
+            id: newList.id,
+            items: [],
+        }
+
+        const prevItems = await AsyncStorage.getItem('items')
+        await AsyncStorage.setItem('items', JSON.stringify([prevItems, listItems]))
     }
 
     function deleteList(id: string) {
