@@ -87,13 +87,7 @@ export function ItemProvider({ children }: ItemProviderProps) {
         newAllItems.map(item => item.id === currentItemListId ? item.items = items : null)
         console.log('newAllItems (ItemContext.tsx):', newAllItems)
 
-        try {
-            await AsyncStorage.setItem('items', JSON.stringify(newAllItems))
-        } catch (err) {
-            console.error(err)
-        }
-        
-        setAllItems(newAllItems)
+        await AsyncStorage.setItem('items', JSON.stringify(newAllItems))
     }
 
     function openModal() {
