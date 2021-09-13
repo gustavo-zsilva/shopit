@@ -13,6 +13,7 @@ type List = {
 type ListsContextProps = {
     lists: List[],
     isModalOpen: boolean,
+    currentList: List | null,
     addList: (newList: List) => void,
     deleteList: (id: string) => void,
     getLists: () => Promise<void>,
@@ -20,6 +21,7 @@ type ListsContextProps = {
     clearLists: () => void,
     openModal: () => void,
     closeModal: () => void,
+    setOpenList: (list: List) => void,
 }
 
 type ListsProviderProps = {
@@ -29,6 +31,7 @@ type ListsProviderProps = {
 export function ListsProvider({ children }: ListsProviderProps) {
 
     const [lists, setLists] = useState<List[]>([])
+    const [currentList, setCurrentList] = useState(null)
     const [isModalOpen, setIsModalOpen] = useState(false)
     
     async function getLists() {
@@ -89,17 +92,26 @@ export function ListsProvider({ children }: ListsProviderProps) {
         setIsModalOpen(false)
     }
 
+    function setOpenList(list: List) {
+        setCurrentList(list)
+    }
+
     async function saveToAsyncStorage() {
         await AsyncStorage.setItem('cards', JSON.stringify(lists))
     }
 
     useEffect(() => {
         getLists()
+        setCurrentList(null)
     }, [])
 
     useEffect(() => {
         saveToAsyncStorage()
     }, [lists])
+
+    useEffect(() => {
+        console.log('Current List opened (ListContext.tsx):', currentList)
+    }, [currentList])
 
     return (
         <ListsContext.Provider
@@ -113,6 +125,8 @@ export function ListsProvider({ children }: ListsProviderProps) {
                 isModalOpen,
                 openModal,
                 closeModal,
+                currentList,
+                setOpenList,
             }}
         >
             {children}

@@ -20,13 +20,13 @@ type ListProps = {
 export function List({ title, createdAt, id }: ListProps) {
 
     const { navigate } = useNavigation()
-    const { lists } = useLists()
-    const list = lists.find(list => list.id === id)
+    const { setOpenList } = useLists()
     const [isMenuOpen, setIsMenuOpen] = useState(false)
 
     function openList() {
         setIsMenuOpen(false)
-        navigate('List', { list })
+        setOpenList({ title, createdAt, id })
+        navigate('List')
     }
 
     function closeMenu() {
@@ -34,7 +34,7 @@ export function List({ title, createdAt, id }: ListProps) {
     }
 
     return (
-        <TouchableNativeFeedback 
+        <TouchableNativeFeedback
             onPress={openList}
             onLongPress={() => setIsMenuOpen(!isMenuOpen)}
         >
@@ -48,7 +48,6 @@ export function List({ title, createdAt, id }: ListProps) {
             </View>
 
         </TouchableNativeFeedback>
-        
     );
 }
 
@@ -58,7 +57,7 @@ const styles = StyleSheet.create({
         flexDirection: 'column',
         alignSelf: 'center',
         width: '90%',
-        marginTop: 20,
+        marginBottom: 20,
         borderRadius: 6,
         shadowColor: '#000',
         shadowRadius: 1,

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 
 import 'react-native-get-random-values';
 
-import { globalStyles, WhiteColor, BgColor } from '../styles/global';
+import { globalStyles, WhiteColor } from '../styles/global';
 import { iconStyles } from '../styles/icons';
 
 import { v4 as uuid } from 'uuid';
@@ -24,14 +24,12 @@ import {
     FlatList
 } from 'react-native';
 
-import AsyncStorage from '@react-native-async-storage/async-storage';
-
 import Header from '../components/Header';
 import { List } from '../components/List';
 import SlideDown from '../animations/SlideDown';
 import { useLists } from '../hooks/useLists'
 
-function Home({ navigation }: any) {
+export default function Home() {
 
     const [listName, setListName] = useState('');
     const { lists, getLists, addList, clearLists, isModalOpen, openModal, closeModal } = useLists()
@@ -101,32 +99,34 @@ function Home({ navigation }: any) {
                 }
             </Header>
 
-            <FlatList
-                data={lists}
-                refreshing={false}
-                onRefresh={getLists}
-                keyboardShouldPersistTaps={'always'}
-                renderItem={({ item }) => (
-                    <List
-                        key={item.id}
-                        title={item.title}
-                        id={item.id}
-                        createdAt={item.createdAt}
-                    />
-                )}
-                ListEmptyComponent={
-                    <View style={styles.noListsMessage}>
-                        <Icon
-                            name="moon"
-                            size={44}
-                            color="#517aff"
+            <View style={styles.listsContainer}>
+                <FlatList
+                    data={lists}
+                    refreshing={false}
+                    onRefresh={getLists}
+                    keyboardShouldPersistTaps={'always'}
+                    renderItem={({ item }) => (
+                        <List
+                            key={item.id}
+                            title={item.title}
+                            id={item.id}
+                            createdAt={item.createdAt}
                         />
-                        <Text style={styles.noListsText}>
-                            Ainda não há listas aqui.
-                        </Text>
-                    </View>
-                }
-            />
+                    )}
+                    ListEmptyComponent={
+                        <View style={styles.noListsMessage}>
+                            <Icon
+                                name="moon"
+                                size={44}
+                                color="#517aff"
+                            />
+                            <Text style={styles.noListsText}>
+                                Ainda não há listas aqui.
+                            </Text>
+                        </View>
+                    }
+                />
+            </View>
 
             <TouchableOpacity
                 style={globalStyles.deleteBtn} 
@@ -149,16 +149,13 @@ const styles = StyleSheet.create({
         flex: 1,
     },
 
-    flatList: {
-        backgroundColor: 'transparent',
-        width: '100%',
-        
-    },
-
     cardsContainer: {
         width: '100%',
         alignItems: 'center',
-       
+    },
+
+    listsContainer: {
+        marginTop: 20,
     },
 
     noListsMessage: {
@@ -188,5 +185,3 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
     },
 })
-
-export default Home;

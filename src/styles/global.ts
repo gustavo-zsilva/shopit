@@ -9,7 +9,7 @@ interface StylesExport {
 
 const PrimaryColor = 'dodgerblue';
 const WhiteColor = '#FFF';
-const BlackColor = '#000';
+const BlackColor = 'rgba(0, 0, 0, 0.3)';
 const BgColor = '#f0f0f0';
 
 const globalStyles = StyleSheet.create({

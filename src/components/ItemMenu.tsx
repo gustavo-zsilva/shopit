@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import {
     View,
     TouchableOpacity,
@@ -7,63 +7,48 @@ import {
     TextInput,
 } from 'react-native'
 
+import { useItems } from '../hooks/useItems';
+
 import Icon from 'react-native-vector-icons/Feather'
 import SlideDown from "../animations/SlideDown";
 import { WhiteColor } from '../styles/global'
 
-export function Menu() {
+type ItemMenuProps = {
+    title: string,
+    price: number,
+    unities: number,
+    isCompleted: boolean,
+    id: string,
+}
 
-    const [newItemPrice, setNewItemPrice] = useState(item.price);
-    const [newItemTitle, setNewItemTitle] = useState(item.title);
-    const [newItemUnities, setNewItemUnities] = useState(item.unities);
+export function ItemMenu({ title, price, unities, isCompleted, id }) {
+
+    const [newItemPrice, setNewItemPrice] = useState(price)
+    const [newItemTitle, setNewItemTitle] = useState(title)
+    const [newItemUnities, setNewItemUnities] = useState(unities)
+    let itemIndex = null
+    const { updateItems, items } = useItems()
+
+    useEffect(() => {
+        itemIndex = items.findIndex(item => item.id === id)
+    }, [])
     
-    const changeItemUnities = () => {
-
-        if (newItemUnities <= 0) return;
-
-        const newCards = [...cards]
-        const indexOfCard = newCards.indexOf(card)
-
+    function handleChangeItemUnities() {
         const newItems = [...items]
         newItems[itemIndex].unities = newItemUnities
-        setItems(newItems)
-        setIsMenuOpen(false)
-
-        newCards[indexOfCard].items = items
-
+        updateItems(newItems)
     }
-
     
-    const changeItemName = () => {
-        const newCards = [...cards];
-        const indexOfCard = newCards.indexOf(card);
-        
-        const newItems = [...items];
-        newItems[itemIndex].title = newItemTitle;
-        setItems(newItems);
-        setIsMenuOpen(false)
-
-        newCards[indexOfCard].items = items;
-
-        saveToStorage(AsyncStorage, newCards);
+    function handleChangeItemTitle() {
+        const newItems = [...items]
+        newItems[itemIndex].title = newItemTitle
+        updateItems(newItems)
     }
-   
 
-    const changeItemPrice = () => {
-
-        if (newItemPrice < 0) return;
-
-        const newCards = [...cards];
-        const indexOfCard = newCards.indexOf(card);
-
-        const newItems = [...items];
-        newItems[itemIndex].price = newItemPrice;
-        setItems(newItems);
-        setIsMenuOpen(false)
-
-        newCards[indexOfCard].items = items;
-
-        saveToStorage(AsyncStorage, newCards);
+    function handleChangeItemPrice() {
+        const newItems = [...items]
+        newItems[itemIndex].price = newItemPrice
+        updateItems(newItems)
     }
 
     return (
@@ -83,6 +68,7 @@ export function Menu() {
 
             <TouchableOpacity
                 activeOpacity={0.6}
+                onPress={handleChangeItemTitle}
             >
                 <View style={styles.button}>
                     <View style={styles.buttonPlaceholder}>
@@ -91,8 +77,8 @@ export function Menu() {
                     </View>
 
                     <TextInput
-                        // value={newListTitle}
-                        // onChangeText={(text) => setNewListTitle(text)}
+                        value={newItemTitle}
+                        onChangeText={(text) => setNewItemTitle(text)}
                         style={styles.input}
                     />
                 </View>
@@ -100,16 +86,18 @@ export function Menu() {
 
             <TouchableOpacity
                 activeOpacity={0.6}
+                onPress={handleChangeItemPrice}
             >
                 <View style={styles.button}>
                     <View style={styles.buttonPlaceholder}>
                         <Icon name="chevron-right" size={24} color="#222" />
-                        <Text style={styles.text}>Mudar nome</Text>
+                        <Text style={styles.text}>Mudar preço</Text>
                     </View>
 
                     <TextInput
-                        // value={newListTitle}
-                        // onChangeText={(text) => setNewListTitle(text)}
+                        value={newItemPrice}
+                        keyboardType="numeric"
+                        onChangeText={(text) => setNewItemPrice(text)}
                         style={styles.input}
                     />
                 </View>
@@ -117,16 +105,18 @@ export function Menu() {
 
             <TouchableOpacity
                 activeOpacity={0.6}
+                onPress={handleChangeItemUnities}
             >
                 <View style={styles.button}>
                     <View style={styles.buttonPlaceholder}>
                         <Icon name="chevron-right" size={24} color="#222" />
-                        <Text style={styles.text}>Mudar nome</Text>
+                        <Text style={styles.text}>Mudar unidades</Text>
                     </View>
 
                     <TextInput
-                        // value={newListTitle}
-                        // onChangeText={(text) => setNewListTitle(text)}
+                        value={newItemUnities}
+                        keyboardType="numeric"
+                        onChangeText={(text) => setNewItemUnities(text)}
                         style={styles.input}
                     />
                 </View>

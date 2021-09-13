@@ -1,14 +1,19 @@
 import React, { createContext, ReactNode, useState, useEffect } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Alert } from "react-native";
+import { useLists } from "../hooks/useLists";
 
 export const ItemContext = createContext({} as ItemContextProps)
 
 type ItemContextProps = {
-    list: List,
     items: Item[],
+    completedItems: Item[],
+    isModalOpen: boolean,
     addItem: (newItem: Item) => void,
     clearItems: () => void,
+    updateItems: (newItems: Item[]) => void,
+    openModal: () => void,
+    closeModal: () => void,
 }
 
 type ItemsList = {
@@ -24,32 +29,29 @@ type Item = {
     id: string,
 }
 
-type List = {
-    id: string;
-    title: string;
-    createdAt: string;
-}
-
 type ItemProviderProps = {
     children: ReactNode,
-    list: List,
 }
 
-export function ItemProvider({ children, list }: ItemProviderProps) {
+export function ItemProvider({ children }: ItemProviderProps) {
 
     const [items, setItems] = useState<Item[]>([])
+    const completedItems = items.filter(item => item.isCompleted)
+    
     const [allItems, setAllItems] = useState<ItemsList[]>([])
-    const [id, setId] = useState('')
-    const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const [currentItemListId, setCurrentItemListId] = useState('')
+    const [isModalOpen, setIsModalOpen] = useState(false)
+    const { currentList } = useLists()
 
     async function getItems() {
         const rawItems = await AsyncStorage.getItem('items')
 
         if (rawItems !== null) {
             const parsedItems: ItemsList[] = JSON.parse(rawItems)
-            const { items, id } = parsedItems.filter(item => item.id === list.id)[0]
+            const { items, id } = parsedItems.filter(item => item.id === currentList?.id)[0]
+            console.log('Items Id (ItemContext.tsx):', id)
             setItems(items)
-            setId(id)
+            setCurrentItemListId(id)
             setAllItems(parsedItems)
         }
     }
@@ -76,11 +78,30 @@ export function ItemProvider({ children, list }: ItemProviderProps) {
         )
     }
 
+    function updateItems(newItems: Item[]) {
+        setItems(newItems)
+    }
+
     async function saveToAsyncStorage() {
         const newAllItems = [...allItems]
-        const currentItemsIndex = newAllItems.findIndex(item => item.id === id)
-        newAllItems[currentItemsIndex].items = items
-        await AsyncStorage.setItem('items', JSON.stringify(newAllItems))
+        newAllItems.map(item => item.id === currentItemListId ? item.items = items : null)
+        console.log('newAllItems (ItemContext.tsx):', newAllItems)
+
+        try {
+            await AsyncStorage.setItem('items', JSON.stringify(newAllItems))
+        } catch (err) {
+            console.error(err)
+        }
+        
+        setAllItems(newAllItems)
+    }
+
+    function openModal() {
+        setIsModalOpen(true)
+    }
+
+    function closeModal() {
+        setIsModalOpen(false)
     }
 
     useEffect(() => {
@@ -94,10 +115,14 @@ export function ItemProvider({ children, list }: ItemProviderProps) {
     return (
         <ItemContext.Provider
             value={{
-                list,
                 items,
+                completedItems,
                 addItem,
                 clearItems,
+                updateItems,
+                isModalOpen,
+                openModal,
+                closeModal,
             }}
         >
             {children}
