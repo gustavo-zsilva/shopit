@@ -47,17 +47,20 @@ export function ItemProvider({ children }: ItemProviderProps) {
     const { currentList } = useLists()
 
     async function getItems() {
-        const rawItems = await AsyncStorage.getItem('items')
-        console.log('RAWITEMS::: ', rawItems)
+        try {
+            const rawItems = await AsyncStorage.getItem('items')
 
-        if (rawItems !== null) {
-            const parsedItems: ItemsList[] = JSON.parse(rawItems)
-            const { items, id } = parsedItems.filter(item => item.id === currentList?.id)[0]
-            console.log('RAWITEMS !== NULL')
-            console.log('Items Id (ItemContext.tsx):', id)
-            setItems(items)
-            setCurrentItemListId(id)
-            setAllItems(parsedItems)
+            if (rawItems !== null) {
+                const parsedItems: ItemsList[] = JSON.parse(rawItems)
+                const currentItemList = parsedItems.filter(item => item.id === currentList?.id)[0]
+                console.log('RAWITEMS !== NULL')
+                console.log('Items Id (ItemContext.tsx):', parsedItems)
+                setItems(currentItemList.items)
+                setCurrentItemListId(currentItemList.id)
+                setAllItems(parsedItems)
+            }
+        } catch (err) {
+            console.error(err)
         }
     }
 
@@ -89,7 +92,8 @@ export function ItemProvider({ children }: ItemProviderProps) {
 
     async function saveToAsyncStorage() {
         const newAllItems = [...allItems]
-        newAllItems.map(item => item.id === currentItemListId ? item.items = items : null)
+        const itemsIndex = allItems.findIndex(item => item.id === currentItemListId)
+        newAllItems[itemsIndex].items = items
         console.log('newAllItems (ItemContext.tsx):', newAllItems)
 
         await AsyncStorage.setItem('items', JSON.stringify(newAllItems))
@@ -116,6 +120,11 @@ export function ItemProvider({ children }: ItemProviderProps) {
     useEffect(() => {
         calculateTotalPrice()
     }, [completedItems])
+
+    useEffect(() => {
+        getItems()
+        return () => setItems([])
+    }, [currentList])
 
     return (
         <ItemContext.Provider

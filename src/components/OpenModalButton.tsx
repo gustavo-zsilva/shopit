@@ -4,6 +4,7 @@ import { useItems } from "../hooks/useItems";
 
 import Icon from 'react-native-vector-icons/Feather'
 import { iconStyles } from '../styles/icons'
+import { PrimaryColor } from '../styles/global'
 
 export function OpenModalButton() {
 
@@ -15,7 +16,7 @@ export function OpenModalButton() {
                 <Icon
                     name="plus"
                     size={32}
-                    color="#FFF"
+                    color={PrimaryColor}
                 />
             </View>
         </TouchableOpacity>

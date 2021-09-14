@@ -20,11 +20,12 @@ type ListProps = {
 export function List({ title, createdAt, id }: ListProps) {
 
     const { navigate } = useNavigation()
-    const { setOpenList } = useLists()
+    const { setOpenList, closeModal } = useLists()
     const [isMenuOpen, setIsMenuOpen] = useState(false)
 
     function openList() {
         setIsMenuOpen(false)
+        closeModal()
         setOpenList({ title, createdAt, id })
         navigate('List')
     }

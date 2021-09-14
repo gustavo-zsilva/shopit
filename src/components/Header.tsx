@@ -19,13 +19,17 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-        padding: 20,
-        paddingTop: StatusBar.currentHeight,
+        padding: 10,
+        paddingHorizontal: 18,
         backgroundColor: 'dodgerblue',
         shadowColor: '#000',
         shadowRadius: 1,
-        elevation: 6
-    }
+        elevation: 6,
+        margin: 18,
+        borderRadius: 9999,
+        // borderTopRightRadius: 8,
+        // borderBottomRightRadius: 8,
+    },
 })
 
 export default Header;

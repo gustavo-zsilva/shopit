@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 
 import 'react-native-get-random-values';
 
-import { globalStyles, WhiteColor } from '../styles/global';
+import { globalStyles, WhiteColor, PrimaryColor } from '../styles/global';
 import { iconStyles } from '../styles/icons';
 
 import { v4 as uuid } from 'uuid';
@@ -55,7 +55,7 @@ export default function Home() {
                 <Text style={globalStyles.text}>Suas Listas</Text>
                 <TouchableNativeFeedback onPress={openModal}>
                     <View style={iconStyles.icon}>
-                        <Icon name="plus" size={32} color="#FFF" />
+                        <Icon name="plus" size={32} color={PrimaryColor} />
                     </View>
                 </TouchableNativeFeedback>
 

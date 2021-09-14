@@ -45,14 +45,16 @@ export function ListsProvider({ children }: ListsProviderProps) {
 
     async function addList(newList: List) {
         setLists([...lists, newList])
-        setIsModalOpen(false)
         const listItems = {
             id: newList.id,
             items: [],
         }
-
+        
         const prevItems = await AsyncStorage.getItem('items')
-        await AsyncStorage.setItem('items', JSON.stringify([prevItems, listItems]))
+        const parsedItems = JSON.parse(prevItems)
+        const newItems = [...parsedItems, listItems]
+        await AsyncStorage.setItem('items', JSON.stringify(newItems))
+        setIsModalOpen(false)
     }
 
     function deleteList(id: string) {

@@ -7,7 +7,7 @@ interface StylesExport {
     globalStyles: StyleSheet;
 }
 
-const PrimaryColor = 'dodgerblue';
+const PrimaryColor = '#5389F3';
 const WhiteColor = '#FFF';
 const BlackColor = 'rgba(0, 0, 0, 0.3)';
 const BgColor = '#f0f0f0';

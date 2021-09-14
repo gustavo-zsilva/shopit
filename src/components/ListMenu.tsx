@@ -112,10 +112,11 @@ const styles = StyleSheet.create({
     },
 
     input: {
-        backgroundColor: '#222',
-        color: WhiteColor,
+        color: '#222',
         width: 120,
         padding: 4,
-        borderRadius: 4
+        borderRadius: 4,
+        borderWidth: 2,
+        borderColor: '#222',
     }
 })

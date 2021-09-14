@@ -48,7 +48,6 @@ export default function List() {
         addItem,
         isModalOpen,
         completedItems,
-        getItems,
         totalPrice,
         closeModal,
     } = useItems()
@@ -57,10 +56,6 @@ export default function List() {
     const [itemName, setItemName] = useState('')
     const [itemPrice, setItemPrice] = useState(0)
     const [itemUnities, setItemUnities] = useState(1)
-
-    useEffect(() => {
-        getItems()
-    }, [])
 
     function handleAddItem() {
         if (itemName === '') return;

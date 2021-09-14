@@ -148,14 +148,15 @@ const styles = StyleSheet.create({
 
     text: {
         color: '#222',
-        fontWeight: '700',
+        fontWeight: '600',
     },
 
     input: {
-        backgroundColor: '#222',
-        color: WhiteColor,
+        color: '#222',
         width: 120,
         padding: 4,
-        borderRadius: 4
+        borderRadius: 4,
+        borderWidth: 2,
+        borderColor: '#222',
     }
 })

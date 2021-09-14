@@ -1,9 +1,10 @@
 import React from 'react'
-import { View, TouchableNativeFeedback } from 'react-native'
+import { View, TouchableNativeFeedback, StyleSheet } from 'react-native'
 import { useNavigation } from '@react-navigation/native'
 
-import Icon from 'react-native-vector-icons/Feather'
+import Icon from 'react-native-vector-icons/MaterialIcons'
 import { iconStyles } from '../styles/icons'
+import { PrimaryColor } from '../styles/global'
 
 export function GoBackButton() {
     const { goBack } = useNavigation()
@@ -12,11 +13,15 @@ export function GoBackButton() {
         <TouchableNativeFeedback onPress={() => goBack()}>
             <View style={iconStyles.icon}>
                 <Icon
-                    name="arrow-left"
+                    name="keyboard-arrow-left"
                     size={32}
-                    color="#FFF"
+                    color={PrimaryColor}
                 />
             </View>
         </TouchableNativeFeedback>
     )
 }
+
+const styles = StyleSheet.create({
+
+})

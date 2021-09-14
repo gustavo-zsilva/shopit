@@ -2,14 +2,15 @@ import { StyleSheet } from 'react-native';
 
 import { BlackColor, WhiteColor } from './global';
 
-const IconColor = '#516aff';
+const IconColor = '#FFF'
+const BorderColor = '#5A85EE'
 
 const iconStyles = StyleSheet.create({
 
     icon: {
         backgroundColor: IconColor,
         borderWidth: 2,
-        borderColor: WhiteColor,
+        borderColor: BorderColor,
         padding: 8,
         borderRadius: 50,
         shadowColor: BlackColor,
@@ -27,4 +28,4 @@ const iconStyles = StyleSheet.create({
     }
 })
 
-export { iconStyles, IconColor }
+export { iconStyles, IconColor, BorderColor }
