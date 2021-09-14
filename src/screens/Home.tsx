@@ -45,6 +45,7 @@ export default function Home() {
         }
 
         addList(newList)
+        setListName('')
     }
 
     return (

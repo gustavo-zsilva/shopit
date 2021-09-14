@@ -49,7 +49,8 @@ export default function List() {
         isModalOpen,
         completedItems,
         getItems,
-        totalPrice
+        totalPrice,
+        closeModal,
     } = useItems()
     console.log('Items: ', items)
 
@@ -73,6 +74,10 @@ export default function List() {
         }
 
         addItem(newItem)
+        setItemName('')
+        setItemPrice(0)
+        setItemUnities(1)
+        closeModal()
     }
     
 
