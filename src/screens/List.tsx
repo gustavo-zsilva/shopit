@@ -25,7 +25,7 @@ import { ItemList } from '../components/ItemList';
 import Icon from 'react-native-vector-icons/Feather'
 import { iconStyles } from '../styles/icons';
 
-import { globalStyles, WhiteColor } from '../styles/global';
+import { globalStyles, PrimaryColor, WhiteColor } from '../styles/global';
 
 interface Card {
     title: string;
@@ -156,7 +156,7 @@ export default function List() {
                                         <Icon
                                             name="plus"
                                             size={32}
-                                            color="#FFF"
+                                            color={PrimaryColor}
                                         />
                                     </View>
                                 </TouchableNativeFeedback>
@@ -200,7 +200,7 @@ const styles = StyleSheet.create({
 
     inputBlock: {
         flex: 1,
-        marginRight: 20
+        marginRight: 10
     },
 
     bigInputBlock: {
@@ -208,11 +208,11 @@ const styles = StyleSheet.create({
     },
 
     smallLabel: {
-        fontSize: 12
+        fontSize: 11
     },
 
     modalBtnContainer: {
-        flexDirection: 'row'
+        flexDirection: 'row',
     },
 
     totalPrice: {

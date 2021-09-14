@@ -108,7 +108,7 @@ const styles = StyleSheet.create({
 
     text: {
         color: '#222',
-        fontWeight: '700',
+        fontWeight: '600',
     },
 
     input: {

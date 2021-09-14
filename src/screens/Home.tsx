@@ -79,7 +79,7 @@ export default function Home() {
                                         <Icon
                                             name="plus"
                                             size={32}
-                                            color="#FFF"
+                                            color={PrimaryColor}
                                         />
                                     </View>
                                 </TouchableNativeFeedback>

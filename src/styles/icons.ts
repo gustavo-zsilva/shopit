@@ -1,6 +1,6 @@
 import { StyleSheet } from 'react-native';
 
-import { BlackColor, WhiteColor } from './global';
+import { BlackColor, PrimaryColor, WhiteColor } from './global';
 
 const IconColor = '#FFF'
 const BorderColor = '#5A85EE'
@@ -24,7 +24,7 @@ const iconStyles = StyleSheet.create({
 
     plusIcon: {
         marginRight: 10,
-        backgroundColor: '#00e200'
+        backgroundColor: IconColor,
     }
 })
 
