@@ -43,7 +43,14 @@ interface Card {
 export default function List() {
 
     const { currentList } = useLists()
-    const { items, addItem, isModalOpen, completedItems, getItems } = useItems()
+    const {
+        items,
+        addItem,
+        isModalOpen,
+        completedItems,
+        getItems,
+        totalPrice
+    } = useItems()
     console.log('Items: ', items)
 
     const [itemName, setItemName] = useState('')
@@ -53,13 +60,6 @@ export default function List() {
     useEffect(() => {
         getItems()
     }, [])
-
-    // Sum of completed items prices
-    let pricesArray = completedItems
-        .map((item: any) => item.price * item.unities)
-        .reduce((accumulator: number, currentValue: number) => accumulator + currentValue, 0)
-
-    const [completedItemsPrice, setCompletedItemsPrice] = useState(pricesArray)
 
     function handleAddItem() {
         if (itemName === '') return;
@@ -179,7 +179,7 @@ export default function List() {
             <Text style={styles.totalPriceText}>
                 R$ {" "}
                 <Text style={styles.totalPriceNumber}>
-                    {completedItemsPrice.toFixed(2)}
+                    {totalPrice.toFixed(2)}
                 </Text>
             </Text>
         </LinearGradient>

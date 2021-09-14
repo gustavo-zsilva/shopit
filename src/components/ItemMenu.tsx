@@ -33,18 +33,21 @@ export function ItemMenu({ title, price, unities, id, closeMenu }: ItemMenuProps
         const newItems = [...items]
         newItems[itemIndex].unities = newUnities
         updateItems(newItems)
+        closeMenu()
     }
     
     function handleChangeItemTitle() {
         const newItems = [...items]
         newItems[itemIndex].title = newTitle
         updateItems(newItems)
+        closeMenu()
     }
 
     function handleChangeItemPrice() {
         const newItems = [...items]
         newItems[itemIndex].price = newPrice
         updateItems(newItems)
+        closeMenu()
     }
 
     return (

@@ -8,6 +8,7 @@ export const ItemContext = createContext({} as ItemContextProps)
 type ItemContextProps = {
     items: Item[],
     completedItems: Item[],
+    totalPrice: number,
     isModalOpen: boolean,
     addItem: (newItem: Item) => void,
     getItems: () => void,
@@ -102,15 +103,26 @@ export function ItemProvider({ children }: ItemProviderProps) {
         setIsModalOpen(false)
     }
 
+    function calculateTotalPrice() {
+        const finalPrice = completedItems.map(item => item.price * item.unities)
+            .reduce((prevNumber, currentNumber) => prevNumber + currentNumber, 0)
+        setTotalPrice(finalPrice)
+    }
+
     useEffect(() => {
         saveToAsyncStorage()
     }, [items])
+
+    useEffect(() => {
+        calculateTotalPrice()
+    }, [completedItems])
 
     return (
         <ItemContext.Provider
             value={{
                 items,
                 completedItems,
+                totalPrice,
                 addItem,
                 getItems,
                 clearItems,
