@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
     View,
     Text,
@@ -40,16 +40,19 @@ interface Card {
     createdAt: string;
 }
 
-export default function List({ route }: any) {
+export default function List() {
 
     const { currentList } = useLists()
-    const { items, addItem, isModalOpen, completedItems } = useItems()
+    const { items, addItem, isModalOpen, completedItems, getItems } = useItems()
     console.log('Items: ', items)
 
-    const [itemName, setItemName] = useState('');
-    const [itemPrice, setItemPrice] = useState(0);
-    const [itemUnities, setItemUnities] = useState(1);
+    const [itemName, setItemName] = useState('')
+    const [itemPrice, setItemPrice] = useState(0)
+    const [itemUnities, setItemUnities] = useState(1)
 
+    useEffect(() => {
+        getItems()
+    }, [])
 
     // Sum of completed items prices
     let pricesArray = completedItems

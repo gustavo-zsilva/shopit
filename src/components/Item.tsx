@@ -34,15 +34,15 @@ function Item({ title, price, unities, isCompleted, id }: ItemProps) {
         updateItems(newItems)
     }
 
-    function handleOpenAndCloseMenu() {
-        setIsMenuOpen(!isMenuOpen)
+    function closeMenu() {
+        setIsMenuOpen(false)
     }
 
     return (
         <TouchableOpacity
             style={[styles.item]}
             onPress={() => handleCheckBoxValueChange()}
-            onLongPress={handleOpenAndCloseMenu}
+            onLongPress={() => setIsMenuOpen(!isMenuOpen)}
         >
             <View style={styles.wrapper}>
                 <CheckBox
@@ -79,8 +79,8 @@ function Item({ title, price, unities, isCompleted, id }: ItemProps) {
                 title={title}
                 price={price}
                 unities={unities}
-                isCompleted={isCompleted}
                 id={id}
+                closeMenu={closeMenu}
             />}
 
         </TouchableOpacity>

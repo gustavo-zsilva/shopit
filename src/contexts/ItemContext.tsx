@@ -10,6 +10,7 @@ type ItemContextProps = {
     completedItems: Item[],
     isModalOpen: boolean,
     addItem: (newItem: Item) => void,
+    getItems: () => void,
     clearItems: () => void,
     updateItems: (newItems: Item[]) => void,
     openModal: () => void,
@@ -37,6 +38,7 @@ export function ItemProvider({ children }: ItemProviderProps) {
 
     const [items, setItems] = useState<Item[]>([])
     const completedItems = items.filter(item => item.isCompleted)
+    const [totalPrice, setTotalPrice] = useState(0)
     
     const [allItems, setAllItems] = useState<ItemsList[]>([])
     const [currentItemListId, setCurrentItemListId] = useState('')
@@ -45,10 +47,12 @@ export function ItemProvider({ children }: ItemProviderProps) {
 
     async function getItems() {
         const rawItems = await AsyncStorage.getItem('items')
+        console.log('RAWITEMS::: ', rawItems)
 
         if (rawItems !== null) {
             const parsedItems: ItemsList[] = JSON.parse(rawItems)
             const { items, id } = parsedItems.filter(item => item.id === currentList?.id)[0]
+            console.log('RAWITEMS !== NULL')
             console.log('Items Id (ItemContext.tsx):', id)
             setItems(items)
             setCurrentItemListId(id)
@@ -99,10 +103,6 @@ export function ItemProvider({ children }: ItemProviderProps) {
     }
 
     useEffect(() => {
-        getItems()
-    }, [])
-
-    useEffect(() => {
         saveToAsyncStorage()
     }, [items])
 
@@ -112,6 +112,7 @@ export function ItemProvider({ children }: ItemProviderProps) {
                 items,
                 completedItems,
                 addItem,
+                getItems,
                 clearItems,
                 updateItems,
                 isModalOpen,

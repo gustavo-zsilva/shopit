@@ -17,37 +17,33 @@ type ItemMenuProps = {
     title: string,
     price: number,
     unities: number,
-    isCompleted: boolean,
     id: string,
+    closeMenu: () => void,
 }
 
-export function ItemMenu({ title, price, unities, isCompleted, id }) {
+export function ItemMenu({ title, price, unities, id, closeMenu }: ItemMenuProps) {
 
-    const [newItemPrice, setNewItemPrice] = useState(price)
-    const [newItemTitle, setNewItemTitle] = useState(title)
-    const [newItemUnities, setNewItemUnities] = useState(unities)
-    let itemIndex = null
+    const [newPrice, setNewPrice] = useState(price)
+    const [newTitle, setNewTitle] = useState(title)
+    const [newUnities, setNewUnities] = useState(unities)
     const { updateItems, items } = useItems()
-
-    useEffect(() => {
-        itemIndex = items.findIndex(item => item.id === id)
-    }, [])
+    let itemIndex = items.findIndex(item => item.id === id)
     
     function handleChangeItemUnities() {
         const newItems = [...items]
-        newItems[itemIndex].unities = newItemUnities
+        newItems[itemIndex].unities = newUnities
         updateItems(newItems)
     }
     
     function handleChangeItemTitle() {
         const newItems = [...items]
-        newItems[itemIndex].title = newItemTitle
+        newItems[itemIndex].title = newTitle
         updateItems(newItems)
     }
 
     function handleChangeItemPrice() {
         const newItems = [...items]
-        newItems[itemIndex].price = newItemPrice
+        newItems[itemIndex].price = newPrice
         updateItems(newItems)
     }
 
@@ -77,8 +73,8 @@ export function ItemMenu({ title, price, unities, isCompleted, id }) {
                     </View>
 
                     <TextInput
-                        value={newItemTitle}
-                        onChangeText={(text) => setNewItemTitle(text)}
+                        value={newTitle}
+                        onChangeText={(text) => setNewTitle(text)}
                         style={styles.input}
                     />
                 </View>
@@ -95,9 +91,9 @@ export function ItemMenu({ title, price, unities, isCompleted, id }) {
                     </View>
 
                     <TextInput
-                        value={newItemPrice}
+                        value={String(newPrice)}
                         keyboardType="numeric"
-                        onChangeText={(text) => setNewItemPrice(text)}
+                        onChangeText={(text) => setNewPrice(Number(text))}
                         style={styles.input}
                     />
                 </View>
@@ -114,9 +110,9 @@ export function ItemMenu({ title, price, unities, isCompleted, id }) {
                     </View>
 
                     <TextInput
-                        value={newItemUnities}
+                        value={String(newUnities)}
                         keyboardType="numeric"
-                        onChangeText={(text) => setNewItemUnities(text)}
+                        onChangeText={(text) => setNewUnities(Number(text))}
                         style={styles.input}
                     />
                 </View>
