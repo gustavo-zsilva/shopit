@@ -40,24 +40,26 @@ export function ItemProvider({ children }: ItemProviderProps) {
     const [items, setItems] = useState<Item[]>([])
     const completedItems = items.filter(item => item.isCompleted)
     const [totalPrice, setTotalPrice] = useState(0)
-    
+
     const [allItems, setAllItems] = useState<ItemsList[]>([])
     const [currentItemListId, setCurrentItemListId] = useState('')
     const [isModalOpen, setIsModalOpen] = useState(false)
     const { currentList } = useLists()
 
     async function getItems() {
+        if (!currentList) return
+
         try {
             const rawItems = await AsyncStorage.getItem('items')
             console.log('Parsed Items: ', JSON.parse(rawItems))
 
             if (rawItems !== null) {
                 const parsedItems: ItemsList[] = JSON.parse(rawItems)
-                const currentItemList = parsedItems.filter(item => item.id === currentList?.id)[0]
+                const currentItemList = parsedItems.find(item => item.id === currentList.id)
                 console.log('Items Parsed (ItemContext.tsx):', parsedItems)
-                setItems(currentItemList.items)
-                setCurrentItemListId(currentItemList.id)
                 setAllItems(parsedItems)
+                setCurrentItemListId(currentItemList.id)
+                setItems(currentItemList.items)
             }
         } catch (err) {
             console.error(err)
@@ -92,9 +94,13 @@ export function ItemProvider({ children }: ItemProviderProps) {
 
     async function saveToAsyncStorage() {
         try {
-            // console.log(allItems)
+            console.log('All Items -> ', allItems)
             const newAllItems = [...allItems]
             const itemsIndex = allItems.findIndex(item => item.id === currentItemListId)
+            if (itemsIndex === -1) {
+                console.log('List not found (returned -1)')
+                return
+            }
             newAllItems[itemsIndex].items = items
             // console.log('newAllItems (ItemContext.tsx):', newAllItems)
     

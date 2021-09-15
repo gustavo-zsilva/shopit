@@ -53,12 +53,11 @@ export function ListsProvider({ children }: ListsProviderProps) {
         try {
             const prevItems = await AsyncStorage.getItem('items')
 
-            if (prevItems !== null) {
-                const parsedItems = JSON.parse(prevItems)
-                const newItems = [...parsedItems, listItems]
-                await AsyncStorage.setItem('items', JSON.stringify(newItems))
-                setIsModalOpen(false)
-            }
+            const parsedItems = prevItems === null ? [] : JSON.parse(prevItems)
+            console.log('There are lists: ', parsedItems)
+            const newItems = [...parsedItems, listItems]
+            await AsyncStorage.setItem('items', JSON.stringify(newItems))
+            setIsModalOpen(false)
             
 
         } catch (err) {
