@@ -49,12 +49,12 @@ export function ItemProvider({ children }: ItemProviderProps) {
     async function getItems() {
         try {
             const rawItems = await AsyncStorage.getItem('items')
+            console.log('Parsed Items: ', JSON.parse(rawItems))
 
             if (rawItems !== null) {
                 const parsedItems: ItemsList[] = JSON.parse(rawItems)
                 const currentItemList = parsedItems.filter(item => item.id === currentList?.id)[0]
-                console.log('RAWITEMS !== NULL')
-                console.log('Items Id (ItemContext.tsx):', parsedItems)
+                console.log('Items Parsed (ItemContext.tsx):', parsedItems)
                 setItems(currentItemList.items)
                 setCurrentItemListId(currentItemList.id)
                 setAllItems(parsedItems)
@@ -91,12 +91,17 @@ export function ItemProvider({ children }: ItemProviderProps) {
     }
 
     async function saveToAsyncStorage() {
-        const newAllItems = [...allItems]
-        const itemsIndex = allItems.findIndex(item => item.id === currentItemListId)
-        newAllItems[itemsIndex].items = items
-        console.log('newAllItems (ItemContext.tsx):', newAllItems)
-
-        await AsyncStorage.setItem('items', JSON.stringify(newAllItems))
+        try {
+            // console.log(allItems)
+            const newAllItems = [...allItems]
+            const itemsIndex = allItems.findIndex(item => item.id === currentItemListId)
+            newAllItems[itemsIndex].items = items
+            // console.log('newAllItems (ItemContext.tsx):', newAllItems)
+    
+            await AsyncStorage.setItem('items', JSON.stringify(newAllItems))
+        } catch (err) {
+            console.error(err)
+        }
     }
 
     function openModal() {

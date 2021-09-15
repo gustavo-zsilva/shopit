@@ -50,11 +50,20 @@ export function ListsProvider({ children }: ListsProviderProps) {
             items: [],
         }
         
-        const prevItems = await AsyncStorage.getItem('items')
-        const parsedItems = JSON.parse(prevItems)
-        const newItems = [...parsedItems, listItems]
-        await AsyncStorage.setItem('items', JSON.stringify(newItems))
-        setIsModalOpen(false)
+        try {
+            const prevItems = await AsyncStorage.getItem('items')
+
+            if (prevItems !== null) {
+                const parsedItems = JSON.parse(prevItems)
+                const newItems = [...parsedItems, listItems]
+                await AsyncStorage.setItem('items', JSON.stringify(newItems))
+                setIsModalOpen(false)
+            }
+            
+
+        } catch (err) {
+            console.error(err)
+        }
     }
 
     function deleteList(id: string) {
@@ -75,7 +84,10 @@ export function ListsProvider({ children }: ListsProviderProps) {
             [
                 {
                     text: "Sim",
-                    onPress: () => setLists([]),
+                    onPress: async () => {
+                        setLists([])
+                        await AsyncStorage.clear()
+                    },
                     style: 'destructive'
                 },
                 {
