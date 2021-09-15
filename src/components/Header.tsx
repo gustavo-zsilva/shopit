@@ -1,7 +1,8 @@
-import React, {useRef, useEffect} from 'react';
-import { View, StyleSheet, StatusBar, Animated } from 'react-native';
+import React from 'react';
+import { StyleSheet, StatusBar } from 'react-native';
 
 import SlideDown from '../animations/SlideDown';
+import { PrimaryColor } from '../styles/global';
 
 function Header({ children, statusBar = true }: any) {
 
@@ -27,8 +28,6 @@ const styles = StyleSheet.create({
         elevation: 6,
         margin: 18,
         borderRadius: 9999,
-        // borderTopRightRadius: 8,
-        // borderBottomRightRadius: 8,
     },
 })
 

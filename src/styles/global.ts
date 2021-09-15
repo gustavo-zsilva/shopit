@@ -1,6 +1,6 @@
 import { StyleSheet } from 'react-native';
 
-const PrimaryColor = '#5389F3';
+const PrimaryColor = '#1E90FF';
 const WhiteColor = '#FFF';
 const BlackColor = 'rgba(0, 0, 0, 0.3)';
 const BgColor = '#f0f0f0';
