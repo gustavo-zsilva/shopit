@@ -75,7 +75,7 @@ export default function Home() {
                             <View style={styles.buttonBlock}>
     
                                 <TouchableNativeFeedback onPress={handleAddList}>
-                                    <View style={[iconStyles.icon, iconStyles.plusIcon]}>
+                                    <View style={[iconStyles.icon, iconStyles.plusButton]}>
                                         <Icon
                                             name="plus"
                                             size={32}
@@ -85,7 +85,7 @@ export default function Home() {
                                 </TouchableNativeFeedback>
                                 
                                 <TouchableNativeFeedback onPress={closeModal}>
-                                    <View style={[iconStyles.icon, iconStyles.minusIcon]}>
+                                    <View style={[iconStyles.icon, iconStyles.minusButton]}>
                                         <Icon
                                             name="minus"
                                             size={32}

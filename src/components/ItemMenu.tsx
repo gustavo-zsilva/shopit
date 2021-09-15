@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import {
     View,
     TouchableOpacity,
@@ -11,7 +11,6 @@ import { useItems } from '../hooks/useItems';
 
 import Icon from 'react-native-vector-icons/Feather'
 import SlideDown from "../animations/SlideDown";
-import { WhiteColor } from '../styles/global'
 
 type ItemMenuProps = {
     title: string,
@@ -23,10 +22,10 @@ type ItemMenuProps = {
 
 export function ItemMenu({ title, price, unities, id, closeMenu }: ItemMenuProps) {
 
-    const [newPrice, setNewPrice] = useState(price)
+    const [newPrice, setNewPrice] = useState(String(price))
     const [newTitle, setNewTitle] = useState(title)
     const [newUnities, setNewUnities] = useState(unities)
-    const { updateItems, items } = useItems()
+    const { updateItems, deleteItem, items } = useItems()
     let itemIndex = items.findIndex(item => item.id === id)
     
     function handleChangeItemUnities() {
@@ -45,8 +44,13 @@ export function ItemMenu({ title, price, unities, id, closeMenu }: ItemMenuProps
 
     function handleChangeItemPrice() {
         const newItems = [...items]
-        newItems[itemIndex].price = newPrice
+        newItems[itemIndex].price = Number(Number(newPrice).toFixed(2))
         updateItems(newItems)
+        closeMenu()
+    }
+
+    function handleDeleteItem() {
+        deleteItem(id)
         closeMenu()
     }
 
@@ -54,6 +58,7 @@ export function ItemMenu({ title, price, unities, id, closeMenu }: ItemMenuProps
         <SlideDown>
             <TouchableOpacity
                 activeOpacity={0.6}
+                onPress={handleDeleteItem}
             >
                 <View style={styles.button}>
                     <View style={styles.buttonPlaceholder}>
@@ -96,7 +101,11 @@ export function ItemMenu({ title, price, unities, id, closeMenu }: ItemMenuProps
                     <TextInput
                         value={String(newPrice)}
                         keyboardType="numeric"
-                        onChangeText={(text) => setNewPrice(Number(text))}
+                        onChangeText={(text) => {
+                            text.replace(/[^0-9]/g, '')
+                            text.replace(/./g, ',')
+                            setNewPrice(text)
+                        }}
                         style={styles.input}
                     />
                 </View>

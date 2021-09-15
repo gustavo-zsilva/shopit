@@ -1,6 +1,6 @@
 import { StyleSheet } from 'react-native';
 
-import { BlackColor, PrimaryColor, WhiteColor } from './global';
+import { BlackColor } from './global';
 
 const IconColor = '#FFF'
 const BorderColor = '#5A85EE'
@@ -18,13 +18,18 @@ const iconStyles = StyleSheet.create({
         elevation: 5
     },
 
-    minusIcon: {
+    minusButton: {
         backgroundColor: '#ff4848',
+        borderRadius: 0,
+        borderTopRightRadius: 50,
+        borderBottomRightRadius: 50,
     },
 
-    plusIcon: {
-        marginRight: 10,
+    plusButton: {
         backgroundColor: IconColor,
+        borderRadius: 0,
+        borderTopLeftRadius: 50,
+        borderBottomLeftRadius: 50,
     }
 })
 

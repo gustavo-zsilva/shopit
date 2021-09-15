@@ -54,12 +54,10 @@ export function ListsProvider({ children }: ListsProviderProps) {
             const prevItems = await AsyncStorage.getItem('items')
 
             const parsedItems = prevItems === null ? [] : JSON.parse(prevItems)
-            console.log('There are lists: ', parsedItems)
             const newItems = [...parsedItems, listItems]
             await AsyncStorage.setItem('items', JSON.stringify(newItems))
             setIsModalOpen(false)
             
-
         } catch (err) {
             console.error(err)
         }
@@ -121,10 +119,6 @@ export function ListsProvider({ children }: ListsProviderProps) {
     useEffect(() => {
         saveToAsyncStorage()
     }, [lists])
-
-    useEffect(() => {
-        console.log('Current List opened (ListContext.tsx):', currentList)
-    }, [currentList])
 
     return (
         <ListsContext.Provider

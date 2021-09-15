@@ -11,6 +11,7 @@ type ItemContextProps = {
     totalPrice: number,
     isModalOpen: boolean,
     addItem: (newItem: Item) => void,
+    deleteItem: (id: string) => void,
     getItems: () => void,
     clearItems: () => void,
     updateItems: (newItems: Item[]) => void,
@@ -38,10 +39,10 @@ type ItemProviderProps = {
 export function ItemProvider({ children }: ItemProviderProps) {
 
     const [items, setItems] = useState<Item[]>([])
+    const [allItems, setAllItems] = useState<ItemsList[]>([])
     const completedItems = items.filter(item => item.isCompleted)
     const [totalPrice, setTotalPrice] = useState(0)
 
-    const [allItems, setAllItems] = useState<ItemsList[]>([])
     const [currentItemListId, setCurrentItemListId] = useState('')
     const [isModalOpen, setIsModalOpen] = useState(false)
     const { currentList } = useLists()
@@ -51,12 +52,10 @@ export function ItemProvider({ children }: ItemProviderProps) {
 
         try {
             const rawItems = await AsyncStorage.getItem('items')
-            console.log('Parsed Items: ', JSON.parse(rawItems))
 
             if (rawItems !== null) {
                 const parsedItems: ItemsList[] = JSON.parse(rawItems)
                 const currentItemList = parsedItems.find(item => item.id === currentList.id)
-                console.log('Items Parsed (ItemContext.tsx):', parsedItems)
                 setAllItems(parsedItems)
                 setCurrentItemListId(currentItemList.id)
                 setItems(currentItemList.items)
@@ -68,6 +67,11 @@ export function ItemProvider({ children }: ItemProviderProps) {
 
     function addItem(newItem: Item) {
         setItems([...items, newItem])
+    }
+
+    function deleteItem(id: string) {
+        const newItems = items.filter(item => item.id !== id)
+        setItems(newItems)
     }
 
     function clearItems() {
@@ -94,15 +98,10 @@ export function ItemProvider({ children }: ItemProviderProps) {
 
     async function saveToAsyncStorage() {
         try {
-            console.log('All Items -> ', allItems)
             const newAllItems = [...allItems]
             const itemsIndex = allItems.findIndex(item => item.id === currentItemListId)
-            if (itemsIndex === -1) {
-                console.log('List not found (returned -1)')
-                return
-            }
+            if (itemsIndex === -1) return
             newAllItems[itemsIndex].items = items
-            // console.log('newAllItems (ItemContext.tsx):', newAllItems)
     
             await AsyncStorage.setItem('items', JSON.stringify(newAllItems))
         } catch (err) {
@@ -144,6 +143,7 @@ export function ItemProvider({ children }: ItemProviderProps) {
                 completedItems,
                 totalPrice,
                 addItem,
+                deleteItem,
                 getItems,
                 clearItems,
                 updateItems,

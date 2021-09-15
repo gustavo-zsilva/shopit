@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { memo, useState } from 'react';
 import {
     View,
     Text,
@@ -9,7 +9,7 @@ import {
     ImageBackground,
 } from 'react-native';
 
-import { v4 as uuidv4 } from 'uuid';
+import { v4 as uuid } from 'uuid';
 import { LinearGradient } from 'expo-linear-gradient';
 
 import Header from '../components/Header'
@@ -17,7 +17,6 @@ import Header from '../components/Header'
 import { useLists } from '../hooks/useLists';
 import { GoBackButton } from '../components/GoBackButton';
 import { useItems } from '../hooks/useItems';
-import { CloseModalButton } from '../components/CloseModalButton';
 import { ClearItemsButton } from '../components/ClearItemsButton';
 import { OpenModalButton } from '../components/OpenModalButton';
 import { ItemList } from '../components/ItemList';
@@ -26,19 +25,6 @@ import Icon from 'react-native-vector-icons/Feather'
 import { iconStyles } from '../styles/icons';
 
 import { globalStyles, PrimaryColor, WhiteColor } from '../styles/global';
-
-interface Card {
-    title: string;
-    items: {
-        id: string;
-        isCompleted: boolean;
-        title: string;
-        price: number;
-        unities: number;
-    }[];
-    id: string;
-    createdAt: string;
-}
 
 export default function List() {
 
@@ -54,7 +40,7 @@ export default function List() {
     console.log('Items: ', items)
 
     const [itemName, setItemName] = useState('')
-    const [itemPrice, setItemPrice] = useState(0)
+    const [itemPrice, setItemPrice] = useState('0')
     const [itemUnities, setItemUnities] = useState(1)
 
     function handleAddItem() {
@@ -62,19 +48,18 @@ export default function List() {
         
         const newItem = {
             title: itemName,
-            price: itemPrice,
+            price: Number(Number(itemPrice).toFixed(2)),
             unities: itemUnities,
             isCompleted: false,
-            id: uuidv4()
+            id: uuid()
         }
 
         addItem(newItem)
         setItemName('')
-        setItemPrice(0)
+        setItemPrice('0')
         setItemUnities(1)
         closeModal()
     }
-    
 
     return (
         <ImageBackground source={require('../assets/shop-app-list-bg.png')} style={styles.container}>
@@ -127,7 +112,7 @@ export default function List() {
                                     onChangeText={(text) => {
                                         text.replace(/[^0-9]/g, '')
                                         text.replace(/./g, ',')
-                                        setItemPrice(Number(text))
+                                        setItemPrice(text)
                                     }}
                                 />
                             </View>
@@ -142,17 +127,13 @@ export default function List() {
                                     keyboardType="numeric"
                                     maxLength={3}
                                     value={String(itemUnities)}
-                                    onChangeText={(text) => {
-                                        text.replace(/[^0-9]/g, '');
-                                        text.replace(/./g, ',')
-                                        setItemUnities(Number(text));
-                                    }}
+                                    onChangeText={(text) => setItemUnities(Number(text))}
                                 />
                             </View>
 
                             <View style={styles.modalBtnContainer}>
                                 <TouchableNativeFeedback onPress={handleAddItem}>
-                                    <View style={[iconStyles.icon, iconStyles.plusIcon]}>
+                                    <View style={[iconStyles.icon, iconStyles.plusButton]}>
                                         <Icon
                                             name="plus"
                                             size={32}
@@ -160,7 +141,15 @@ export default function List() {
                                         />
                                     </View>
                                 </TouchableNativeFeedback>
-                                <CloseModalButton />
+                                <TouchableNativeFeedback onPress={closeModal}>
+                                    <View style={[iconStyles.icon, iconStyles.minusButton]}>
+                                        <Icon
+                                            name="minus"
+                                            size={32}
+                                            color="#FFF"
+                                        />
+                                    </View>
+                                </TouchableNativeFeedback>
                             </View>
                         </View>
                     )
@@ -195,20 +184,20 @@ const styles = StyleSheet.create({
 
     headerText: {
         color: WhiteColor,
-        fontSize: 18
+        fontSize: 18,
     },
 
     inputBlock: {
         flex: 1,
-        marginRight: 10
+        marginRight: 10,
     },
 
     bigInputBlock: {
-        flex: 2
+        flex: 2,
     },
 
     smallLabel: {
-        fontSize: 11
+        fontSize: 11,
     },
 
     modalBtnContainer: {
