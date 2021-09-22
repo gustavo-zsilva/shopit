@@ -37,7 +37,6 @@ export default function List() {
         totalPrice,
         closeModal,
     } = useItems()
-    console.log('Items: ', items)
 
     const [itemName, setItemName] = useState('')
     const [itemPrice, setItemPrice] = useState('0')
