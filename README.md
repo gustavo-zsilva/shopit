@@ -1,8 +1,10 @@
 # <p align="center"><img src="/mobile/src/assets/icon.png" alt="Icon" width="35px" height="35px" align="top" style="marginRight: 1rem;" />Shopit</p>
 
-Shopit helps you manage your shopping lists in an easy and practical way.
-It's recommended for people who are constantly in need of remembering what they had to buy on a store,
-or people that have to be writing their lists on paper. If that's your case, Shopit will surely help you.
+<p align="center">
+  Shopit helps you manage your shopping lists in an easy and practical way.
+  It's recommended for people who are constantly in need of remembering what they had to buy on a store,
+  or people that have to be writing their lists on paper. If that's your case, Shopit will surely help you.  
+</p>
 
 ### ⭐ Shopit also has its website, check it out [here](https://shopit-ten.vercel.app) to download it ⭐.
 
