@@ -26,3 +26,5 @@ would be a performance issue. So I made two arrays that connected bythe same Id,
 I implemented two contexts also, that was kinda tricky because every component needed some information, so I had to think very accuratelly to make it work.
 
 In the end, with lots of energy and thinking to solve every issue, everything worked, and honestly I had lots of fun making Shopit. 💯💯
+
+> Note: Mobile is the actual app. Web is its website folder.
