@@ -1,4 +1,4 @@
-# <p align="center"><img src="/src/assets/icon.png" alt="Icon" width="35px" height="35px" align="top" style="marginRight: 1rem;" />Shopit</p>
+# <p align="center"><img src="/mobile/src/assets/icon.png" alt="Icon" width="35px" height="35px" align="top" style="marginRight: 1rem;" />Shopit</p>
 
 Shopit helps you manage your shopping lists in an easy and practical way.
 It's recommended for people who are constantly in need of remembering what they had to buy on a store,
