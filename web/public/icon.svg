@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="200mm"
+   height="200mm"
+   viewBox="0 0 200 200"
+   version="1.1"
+   id="svg16"
+   inkscape:version="0.92.3 (2405546, 2018-03-11)"
+   sodipodi:docname="shop-app-icon.svg"
+   inkscape:export-filename="/home/gustavo/Imagens/Arte Digital/shop-app-icon.png"
+   inkscape:export-xdpi="130.048"
+   inkscape:export-ydpi="130.048">
+  <defs
+     id="defs10">
+    <linearGradient
+       inkscape:collect="always"
+       id="linearGradient890">
+      <stop
+         style="stop-color:#f9f9f9;stop-opacity:1;"
+         offset="0"
+         id="stop886" />
+      <stop
+         style="stop-color:#f2f2f2;stop-opacity:1"
+         offset="1"
+         id="stop888" />
+    </linearGradient>
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient890"
+       id="linearGradient892"
+       x1="100.35268"
+       y1="167.96651"
+       x2="100.73065"
+       y2="33.784966"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="translate(-168.91434,3.2072343)" />
+  </defs>
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="0.35"
+     inkscape:cx="-365.30553"
+     inkscape:cy="409.3692"
+     inkscape:document-units="mm"
+     inkscape:current-layer="layer1"
+     showgrid="false"
+     inkscape:window-width="1920"
+     inkscape:window-height="1054"
+     inkscape:window-x="1920"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1" />
+  <metadata
+     id="metadata13">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="BaseIcon"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(0,-97)"
+     style="display:inline">
+    <rect
+       style="opacity:1;vector-effect:none;fill:#1e90ff;fill-opacity:1;fill-rule:evenodd;stroke-width:0.26458332;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;stroke:none"
+       id="rect18"
+       width="176.89285"
+       height="173.1131"
+       x="12.095235"
+       y="111.03572"
+       ry="31.317488" />
+  </g>
+  <g
+     inkscape:groupmode="layer"
+     id="layer2"
+     inkscape:label="BaseIcon-2">
+    <rect
+       style="display:inline;opacity:1;vector-effect:none;fill:url(#linearGradient892);fill-opacity:1;fill-rule:evenodd;stroke-width:0.28625539;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       id="rect874"
+       width="86.178566"
+       height="133.61458"
+       x="-111.46196"
+       y="37.275681"
+       ry="11.503243" />
+  </g>
+  <g
+     inkscape:groupmode="layer"
+     id="layer5"
+     inkscape:label="CheckBoxBg">
+    <rect
+       style="opacity:0.06199999;vector-effect:none;fill:#000004;fill-opacity:1;fill-rule:evenodd;stroke-width:0.26458332;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       id="rect2043"
+       width="86.169617"
+       height="89.072205"
+       x="-134.01086"
+       y="-21.637886"
+       ry="1.7953857" />
+  </g>
+  <g
+     inkscape:groupmode="layer"
+     id="layer3"
+     inkscape:label="CheckBox">
+    <path
+       style="opacity:1;vector-effect:none;fill:none;fill-opacity:1;fill-rule:evenodd;stroke:#f9f9f9;stroke-width:8.26000023;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       d="m 56.819575,54.266659 h 85.743915 c 1.45996,0 2.63531,1.175346 2.63531,2.635306 v 85.743925 c 0,1.45996 -1.17535,2.63531 -2.63531,2.63531 H 56.819575 c -1.45996,0 -2.635307,-1.17535 -2.635307,-2.63531 V 56.901965 c 0,-1.45996 1.175347,-2.635306 2.635307,-2.635306 z"
+       id="rect898"
+       inkscape:connector-curvature="0" />
+  </g>
+  <g
+     inkscape:groupmode="layer"
+     id="layer4"
+     inkscape:label="CheckMark" />
+  <path
+     style="fill:#f9f9f9;stroke:#f9f9f9;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+     d="m 70.584272,102.358 c 7.662682,6.97386 15.958477,13.15632 21.733629,22.48959 C 113.14847,91.844587 132.24975,71.169881 157.5188,41.881816 132.51186,67.781287 119.76636,77.165673 92.317901,113.31931 88.365252,108.84257 78.115248,105.94016 70.584272,102.358 Z"
+     id="path2045"
+     inkscape:connector-curvature="0"
+     sodipodi:nodetypes="ccccc" />
+</svg>
