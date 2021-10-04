@@ -1,6 +1,15 @@
 # <p align="center"><img src="/mobile/src/assets/icon.png" alt="Icon" width="35px" height="35px" align="top" style="marginRight: 1rem;" />Shopit</p>
 
 <p align="center">
+  <img alt="GitHub repo size" src="https://img.shields.io/github/repo-size/gustavo-zsilva/shopit">
+  <img alt="GitHub language count" src="https://img.shields.io/github/languages/count/gustavo-zsilva/shopit">
+  <img alt="GitHub commit activity" src="https://img.shields.io/github/commit-activity/m/gustavo-zsilva/shopit">
+  <img alt="Website" src="https://img.shields.io/website?url=https%3A%2F%2Fshopit-ten.vercel.app">
+  <img alt="GitHub Repo stars" src="https://img.shields.io/github/stars/gustavo-zsilva/shopit?style=social">
+  <img alt="Twitch Status" src="https://img.shields.io/twitch/status/admpoggers?style=social">
+</p>
+
+<p align="center">
   Shopit helps you manage your shopping lists in an easy and practical way.
   It's recommended for people who are constantly in need of remembering what they had to buy on a store,
   or people that have to be writing their lists on paper. If that's your case, Shopit will surely help you.  
