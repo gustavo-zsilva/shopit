@@ -1,12 +1,24 @@
-import { Flex, Heading, Text, Divider, Button, ButtonGroup, Alert, AlertIcon, GridItem, AlertDescription } from '@chakra-ui/react'
+import {
+  Flex,
+  Heading,
+  Text,
+  Divider,
+  Button,
+  ButtonGroup,
+  Alert,
+  AlertIcon,
+  AlertDescription,
+} from '@chakra-ui/react'
 import { FiDownload } from 'react-icons/fi'
 import { GiCampfire } from 'react-icons/gi'
 import { useDownload } from '../hooks/useDownload'
+import { Skeleton } from '../components/Skeleton'
+import { useLoad } from '../hooks/useLoad'
 
 export function ProductDescription() {
 
   const { handleDownloadApp } = useDownload()
-
+  
   return (
       <Flex
         flexDir="column"
@@ -20,11 +32,14 @@ export function ProductDescription() {
           <Heading fontSize={{ lg: "3rem", md: "4rem", sm: "3.2rem" }} textShadow="0 0 5px rgba(255, 255, 255, .8)">
             Your Shopping Helper.
           </Heading>
+          
           <Text fontSize="1.5rem">
             Simplistic and Practical.
             No Experience Required.
           </Text>
+          
           <Divider />
+          
           <Text fontSize="1.1rem" maxW={{ lg: "90%", sm: "80%" }}>
             Shopit handles all the shopping confusion for you,
             just create your lists and start making your life easier.
