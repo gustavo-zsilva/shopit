@@ -1,8 +1,19 @@
-# <p align="center"><img src="/src/assets/icon.png" alt="Icon" width="35px" height="35px" align="top" style="marginRight: 1rem;" />Shopit</p>
+# <p align="center"><img src="/mobile/src/assets/icon.png" alt="Icon" width="35px" height="35px" align="top" style="marginRight: 1rem;" />Shopit</p>
 
-Shopit helps you manage your shopping lists in an easy and practical way.
-It's recommended for people who are constantly in need of remembering what they had to buy on a store,
-or people that have to be writing their lists on paper. If that's your case, Shopit will surely help you.
+<p align="center">
+  <img alt="GitHub repo size" src="https://img.shields.io/github/repo-size/gustavo-zsilva/shopit">
+  <img alt="GitHub language count" src="https://img.shields.io/github/languages/count/gustavo-zsilva/shopit">
+  <img alt="GitHub commit activity" src="https://img.shields.io/github/commit-activity/m/gustavo-zsilva/shopit">
+  <img alt="Website" src="https://img.shields.io/website?url=https%3A%2F%2Fshopit-ten.vercel.app">
+  <img alt="GitHub Repo stars" src="https://img.shields.io/github/stars/gustavo-zsilva/shopit?style=social">
+  <img alt="Twitch Status" src="https://img.shields.io/twitch/status/admpoggers?style=social">
+</p>
+
+<p align="center">
+  Shopit helps you manage your shopping lists in an easy and practical way.
+  It's recommended for people who are constantly in need of remembering what they had to buy on a store,
+  or people that have to be writing their lists on paper. If that's your case, Shopit will surely help you.  
+</p>
 
 ### ⭐ Shopit also has its website, check it out [here](https://shopit-ten.vercel.app) to download it ⭐.
 
@@ -26,3 +37,5 @@ would be a performance issue. So I made two arrays that connected bythe same Id,
 I implemented two contexts also, that was kinda tricky because every component needed some information, so I had to think very accuratelly to make it work.
 
 In the end, with lots of energy and thinking to solve every issue, everything worked, and honestly I had lots of fun making Shopit. 💯💯
+
+> Note: Mobile is the actual app. Web is its website folder.
