@@ -6,6 +6,7 @@ export function useDownload() {
 
     const [downloadProgress, setDownloadProgress] = useState(0)
     const [error, setError] = useState(null)
+    const downloadUrl = `/assets/shopit.apk`
     const toast = useToast()
     const toastId = useRef<string | number>()
 
@@ -46,7 +47,7 @@ export function useDownload() {
         })
 
         try {
-            const response = await axios.get("https://exp-shell-app-assets.s3.us-west-1.amazonaws.com/android/%40gustavo-silva/shopit-30170529c6d34b50bff55f9d7b640688-signed.apk", 
+            const response = await axios.get(downloadUrl, 
             {
                 responseType: 'blob',
                 onDownloadProgress: (progressEvent) => {
@@ -56,7 +57,7 @@ export function useDownload() {
                     if (percentageCompleted === 100) {
                         toast.update(toastId.current, {
                             title: "Downloaded!",
-                            description: "You can now install Shopit.",
+                            description: "You now have Shopit.",
                             position: "top",
                             status: "success",
                         })
