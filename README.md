@@ -15,6 +15,13 @@
   or people that have to be writing their lists on paper. If that's your case, Shopit will surely help you.  
 </p>
 
+<p align="center">
+  <a href="#-technologies">Technologies</a>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
+  <a href="#-things-i-learned">Things I Learned</a>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
+  <a href="#-layout">Layout</a>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
+  <a href="#memo-licença">License</a>
+</p>
+
 ### ⭐ Shopit also has its website, check it out [here](https://shopit-ten.vercel.app) to download it ⭐.
 
 > This app was intirely made with React Native w/ Expo and Typescript. <img src="https://emojis.slackmojis.com/emojis/images/1479745458/1383/typescript.png?1479745458" alt="Typescript Img" width="15px" height="15px" align="center" />
@@ -39,3 +46,15 @@ I implemented two contexts also, that was kinda tricky because every component n
 In the end, with lots of energy and thinking to solve every issue, everything worked, and honestly I had lots of fun making Shopit. 💯💯
 
 > Note: Mobile is the actual app. Web is its website folder.
+
+## 🔖 Layout
+
+This project does not have a layout on Figma.
+
+## :memo: License
+
+This project is under MIT license.
+
+---
+
+Made by Gustavo Zonta :wave:
