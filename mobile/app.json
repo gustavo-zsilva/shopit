@@ -2,14 +2,15 @@
   "expo": {
     "name": "Shopit",
     "slug": "shopit",
-    "version": "1.0.0",
+    "version": "2.0.0",
     "orientation": "portrait",
     "icon": "./src/assets/icon.png",
+    "userInterfaceStyle": "light",
+    "scheme": "shopit",
     "splash": {
       "image": "./src/assets/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#f0f0f0"
-
+      "backgroundColor": "#F4EFE6"
     },
     "updates": {
       "fallbackToCacheTimeout": 0
@@ -18,18 +19,42 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.gustavosilva.shopapp"
     },
     "android": {
+      "package": "com.gustavosilva.shopapp",
+      "softwareKeyboardLayoutMode": "resize",
+      "predictiveBackGestureEnabled": false,
       "adaptiveIcon": {
         "foregroundImage": "./src/assets/adaptive-icon.png",
-        "backgroundColor": "#FFFFFF"
-      },
-      "package": "com.gustavosilva.shopapp"
+        "backgroundColor": "#F4EFE6"
+      }
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./src/assets/favicon.png"
     },
-    "description": "Shop listing to keep track of what you need to buy."
+    "plugins": [
+      "expo-font",
+      "expo-splash-screen",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "O Shopit usa a câmera para identificar o produto e ler o preço impresso na embalagem.",
+          "recordAudioAndroid": false
+        }
+      ],
+      [
+        "expo-speech-recognition",
+        {
+          "microphonePermission": "O Shopit usa o microfone para anotar o que você precisa comprar.",
+          "speechRecognitionPermission": "O Shopit transforma o que você fala em itens da lista.",
+          "androidSpeechServicePackages": ["com.google.android.googlequicksearchbox"]
+        }
+      ],
+      "expo-ocr-kit",
+      "expo-status-bar"
+    ],
+    "description": "Listas de compra com preço, no celular."
   }
 }

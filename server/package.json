@@ -1,0 +1,11 @@
+{
+  "name": "shopit-server",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node src/index.mjs"
+  },
+  "dependencies": {
+    "socket.io": "^4.8.1"
+  }
+}

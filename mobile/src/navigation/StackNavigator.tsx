@@ -1,39 +1,34 @@
 import React from 'react';
-import { NavigationContainer, NavigationProp } from '@react-navigation/native';
-import { createStackNavigator, StackNavigationProp } from '@react-navigation/stack'
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
-import Home from '../screens/Home'
-import List from '../screens/List'
-import Create from '../screens/Create'
+import Home from '../screens/Home';
+import ListScreen from '../screens/List';
+import Scanner from '../screens/Scanner';
+import { colors } from '../theme';
+import { RootStackParamList } from './types';
 
-type RootStackParamList = {
-    Home: undefined,
-    List: undefined,
-    Create: undefined,
-};
+const Stack = createNativeStackNavigator<RootStackParamList>();
 
-type HomeScreenNavigationProp = StackNavigationProp<
-    RootStackParamList,
-    'Home'
->;
-
-type Props = {
-    navigation: HomeScreenNavigationProp;
+export default function StackNavigator() {
+  return (
+    <NavigationContainer>
+      <Stack.Navigator
+        initialRouteName="Home"
+        screenOptions={{
+          headerShown: false,
+          contentStyle: { backgroundColor: colors.paper },
+          animation: 'slide_from_right',
+        }}
+      >
+        <Stack.Screen name="Home" component={Home} />
+        <Stack.Screen name="List" component={ListScreen} />
+        <Stack.Screen
+          name="Scanner"
+          component={Scanner}
+          options={{ animation: 'slide_from_bottom' }}
+        />
+      </Stack.Navigator>
+    </NavigationContainer>
+  );
 }
-
-function StackNavigator() {
-
-    const { Navigator, Screen } = createStackNavigator<RootStackParamList>();
-
-    return (
-        <NavigationContainer>
-            <Navigator initialRouteName="Home" headerMode="none">
-                <Screen name="Home" component={Home} />
-                <Screen name="List" component={List} />
-                <Screen name="Create" component={Create} />
-            </Navigator>
-        </NavigationContainer>
-    );
-}
-
-export default StackNavigator;

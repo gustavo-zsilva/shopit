@@ -1,0 +1,8 @@
+{
+  "_comment": "Cada código libera o premium uma única vez. Acrescente códigos novos nesta lista. Apagar um código daqui não o libera de novo: o uso fica gravado em data/state.json.",
+  "codes": [
+    "CASA-LIVRE-01",
+    "CASA-LIVRE-02",
+    "CASA-LIVRE-03"
+  ]
+}

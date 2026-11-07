@@ -1,221 +1,680 @@
-import React, { memo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
-    View,
-    Text,
-    StyleSheet,
-    TouchableNativeFeedback,
-    TextInput,
-    ScrollView,
-    ImageBackground,
+  Alert,
+  Pressable,
+  SectionList,
+  StyleSheet,
+  Text,
+  View,
 } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import * as Crypto from 'expo-crypto';
+import { Feather } from '@expo/vector-icons';
 
-import { v4 as uuid } from 'uuid';
-import { LinearGradient } from 'expo-linear-gradient';
+import { useLists } from '../contexts/ListContext';
+import { useItems } from '../contexts/ItemContext';
+import { RootStackParamList } from '../navigation/types';
+import { Item } from '../types';
+import { colors, fonts } from '../theme';
+import { formatBRL } from '../utils/format';
+import { tap } from '../utils/haptics';
+import { Button, IconButton, SectionLabel } from '../components/ui';
+import { Sheet } from '../components/Sheet';
+import { ItemFields } from '../components/ItemFields';
+import { VoiceSheet } from '../components/VoiceSheet';
+import { ReminderSheet } from '../components/ReminderSheet';
+import { RecurringSheet } from '../components/RecurringSheet';
+import { HouseSheet } from '../components/HouseSheet';
+import { useHouse } from '../contexts/HouseContext';
+import { pricesFor, PriceRecord } from '../utils/priceHistory';
+import { SpokenItem } from '../utils/parseSpeech';
+import { clearReminder, reminderFor, scheduleReminder, ShoppingReminder, describeWhen } from '../utils/reminders';
+import { readRecurring } from '../utils/recurring';
+import { RecurringPurchase } from '../types';
 
-import Header from '../components/Header'
+type EditorState =
+  | { mode: 'create' }
+  | { mode: 'edit'; item: Item }
+  | null;
 
-import { useLists } from '../hooks/useLists';
-import { GoBackButton } from '../components/GoBackButton';
-import { useItems } from '../hooks/useItems';
-import { ClearItemsButton } from '../components/ClearItemsButton';
-import { OpenModalButton } from '../components/OpenModalButton';
-import { ItemList } from '../components/ItemList';
+export default function ListScreen() {
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const insets = useSafeAreaInsets();
+  const { currentList, deleteList } = useLists();
+  const {
+    items,
+    totalPrice,
+    estimatedPrice,
+    addItem,
+    updateItem,
+    toggleItem,
+    deleteItem,
+    clearItems,
+  } = useItems();
+  const [editor, setEditor] = useState<EditorState>(null);
+  const [menu, setMenu] = useState(false);
+  const [voice, setVoice] = useState(false);
+  const [reminderOpen, setReminderOpen] = useState(false);
+  const [repeatOpen, setRepeatOpen] = useState(false);
+  const [reminder, setReminder] = useState<ShoppingReminder | null>(null);
+  const [repeats, setRepeats] = useState<RecurringPurchase[]>([]);
+  const [houseOpen, setHouseOpen] = useState(false);
+  const { house, setAdding, remaining, consume } = useHouse();
 
-import Icon from 'react-native-vector-icons/Feather'
-import { iconStyles } from '../styles/icons';
+  useEffect(() => {
+    if (!currentList) navigation.goBack();
+  }, [currentList, navigation]);
 
-import { globalStyles, PrimaryColor, WhiteColor } from '../styles/global';
+  async function refreshExtras() {
+    if (!currentList) return;
+    const [nextReminder, rules] = await Promise.all([
+      reminderFor(currentList.id),
+      readRecurring(),
+    ]);
+    setReminder(nextReminder);
+    setRepeats(rules.filter((rule) => rule.listId === currentList.id));
+  }
 
-export default function List() {
+  useEffect(() => {
+    void refreshExtras();
+  }, [currentList?.id]);
 
-    const { currentList } = useLists()
-    const {
-        items,
-        addItem,
-        isModalOpen,
-        completedItems,
-        totalPrice,
-        closeModal,
-    } = useItems()
+  useEffect(() => {
+    setAdding(voice || editor !== null);
+    return () => setAdding(false);
+  }, [voice, editor, setAdding]);
 
-    const [itemName, setItemName] = useState('')
-    const [itemPrice, setItemPrice] = useState('0')
-    const [itemUnities, setItemUnities] = useState(1)
+  const pending = items.filter((item) => !item.isCompleted);
+  const done = items.filter((item) => item.isCompleted);
+  const sections = [
+    pending.length ? { title: 'Para pegar', data: pending } : null,
+    done.length ? { title: 'No carrinho', data: done } : null,
+  ].filter((section): section is { title: string; data: Item[] } => section !== null);
 
-    function handleAddItem() {
-        if (itemName === '') return;
-        
-        const newItem = {
-            title: itemName,
-            price: Number(Number(itemPrice).toFixed(2)),
-            unities: itemUnities,
-            isCompleted: false,
-            id: uuid()
-        }
+  function saveItem(draft: { title: string; price: number; unities: number; store: string }) {
+    const title = draft.title.trim();
+    if (!title || !editor) return;
+    const unities = Math.max(1, Math.round(draft.unities) || 1);
+    const price = Number.isFinite(draft.price) ? draft.price : 0;
+    const store = draft.store.trim() || undefined;
 
-        addItem(newItem)
-        setItemName('')
-        setItemPrice('0')
-        setItemUnities(1)
-        closeModal()
+    if (editor.mode === 'create') {
+      addItem({
+        id: Crypto.randomUUID(),
+        title,
+        price,
+        unities,
+        store,
+        isCompleted: false,
+      });
+    } else {
+      updateItem(editor.item.id, { title, price, unities, store });
     }
 
-    return (
-        <ImageBackground source={require('../assets/shop-app-list-bg.png')} style={styles.container}>
-        <ScrollView keyboardShouldPersistTaps={'handled'}>
+    setEditor(null);
+    tap('success');
+  }
 
-            {/* Header */}
-            <Header>
-                <GoBackButton />
+  function addSpoken(item: SpokenItem) {
+    addItem({
+      id: Crypto.randomUUID(),
+      title: item.title,
+      price: 0,
+      unities: item.unities,
+      note: item.note,
+      isCompleted: false,
+    });
+  }
 
-                <Text style={styles.headerText}>
-                    {currentList?.title}
-                </Text>
-
-                <Text style={styles.headerText}>
-                    {completedItems.length}/{items.length}
-                </Text>
-
-                <OpenModalButton />
-
-                {
-                    isModalOpen && (
-                        <View style={globalStyles.modal}>
-
-                            <View style={[styles.inputBlock, styles.bigInputBlock]}>
-                                <Text style={globalStyles.label}>
-                                    Nome
-                                </Text>
-                                <TextInput
-                                    placeholder="ex: Cebola"
-                                    style={globalStyles.input}
-                                    value={itemName}
-                                    onChangeText={(text) => setItemName(text)}
-                                    autoFocus={true}
-                                    maxLength={38}
-                                    returnKeyType="done"
-                                    blurOnSubmit={false}
-                                />
-                            </View>
-
-                            <View style={styles.inputBlock}>
-                                <Text style={globalStyles.label}>
-                                    R$
-                                </Text>
-                                <TextInput
-                                    placeholder="0"
-                                    style={globalStyles.input}
-                                    keyboardType="numeric"
-                                    maxLength={8}
-                                    value={String(itemPrice)}
-                                    onChangeText={(text) => {
-                                        text.replace(/[^0-9]/g, '')
-                                        text.replace(/./g, ',')
-                                        setItemPrice(text)
-                                    }}
-                                />
-                            </View>
-
-                            <View style={styles.inputBlock}>
-                                <Text style={[globalStyles.label, styles.smallLabel]}>
-                                    Unidades
-                                </Text>
-                                <TextInput
-                                    placeholder="1"
-                                    style={globalStyles.input}
-                                    keyboardType="numeric"
-                                    maxLength={3}
-                                    value={String(itemUnities)}
-                                    onChangeText={(text) => setItemUnities(Number(text))}
-                                />
-                            </View>
-
-                            <View style={styles.modalBtnContainer}>
-                                <TouchableNativeFeedback onPress={handleAddItem}>
-                                    <View style={[iconStyles.icon, iconStyles.plusButton]}>
-                                        <Icon
-                                            name="plus"
-                                            size={32}
-                                            color={PrimaryColor}
-                                        />
-                                    </View>
-                                </TouchableNativeFeedback>
-                                <TouchableNativeFeedback onPress={closeModal}>
-                                    <View style={[iconStyles.icon, iconStyles.minusButton]}>
-                                        <Icon
-                                            name="minus"
-                                            size={32}
-                                            color="#FFF"
-                                        />
-                                    </View>
-                                </TouchableNativeFeedback>
-                            </View>
-                        </View>
-                    )
-                }
-            </Header>
-
-            <ItemList />
-        </ScrollView>
-
-        <LinearGradient
-            colors={['#FFF', 'transparent']}
-            style={styles.totalPrice}
-            start={{ x: 0.2, y: 0 }}
-            end={{ x: 1, y: 0 }}
-        >
-            <Text style={styles.totalPriceText}>
-                R$ {" "}
-                <Text style={styles.totalPriceNumber}>
-                    {totalPrice.toFixed(2)}
-                </Text>
-            </Text>
-        </LinearGradient>
-            <ClearItemsButton />
-        </ImageBackground>
+  function confirmClear() {
+    Alert.alert(
+      'Esvaziar esta lista?',
+      'Os itens saem. A lista continua.',
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        {
+          text: 'Esvaziar',
+          style: 'destructive',
+          onPress: () => {
+            clearItems();
+            setMenu(false);
+            tap('warning');
+          },
+        },
+      ],
     );
+  }
+
+  function confirmDeleteList() {
+    if (!currentList) return;
+    Alert.alert(
+      'Excluir esta lista?',
+      `"${currentList.title}" e os itens dela saem do celular.`,
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        {
+          text: 'Excluir',
+          style: 'destructive',
+          onPress: () => {
+            tap('warning');
+            void deleteList(currentList.id);
+            navigation.goBack();
+          },
+        },
+      ],
+    );
+  }
+
+  if (!currentList) return <View style={styles.screen} />;
+
+  const progress = items.length === 0 ? 0 : done.length / items.length;
+
+  return (
+    <View style={styles.screen}>
+      <View style={[styles.header, { paddingTop: insets.top + 10 }]}>
+        <IconButton name="arrow-left" label="Voltar" onPress={() => navigation.goBack()} />
+        <View style={styles.headerText}>
+          <Text style={styles.title} numberOfLines={1}>{currentList.title}</Text>
+          <Text style={styles.subtitle}>
+            {reminder
+              ? `Lembrete ${describeWhen(reminder.at)}`
+              : items.length === 0
+                ? 'Nada por aqui ainda'
+                : `${done.length} de ${items.length} no carrinho`}
+          </Text>
+          {house && house.presence.length > 0 && (
+            <Text style={styles.subtitle}>
+              {house.presence.map((person) => (
+                person.mode === 'adding' ? `${person.name} está adicionando` : person.name
+              )).join(' · ')}
+            </Text>
+          )}
+        </View>
+        <IconButton name="more-horizontal" label="Opções da lista" onPress={() => setMenu(true)} />
+      </View>
+
+      <View style={styles.progressWrap}>
+        <View style={styles.track}>
+          <View style={[styles.fill, { width: `${Math.round(progress * 100)}%` }]} />
+        </View>
+      </View>
+
+      {items.length === 0 ? (
+        <View style={styles.empty}>
+          <Text style={styles.emptyTitle}>Nada nesta lista</Text>
+          <Text style={styles.emptyText}>
+            Fale a compra, escaneie o código ou digite o item. Marque quando ele entrar no carrinho — o total de baixo soma só esses.
+          </Text>
+        </View>
+      ) : (
+        <SectionList
+          sections={sections}
+          keyExtractor={(item) => item.id}
+          style={styles.list}
+          contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: insets.bottom + 170 }}
+          stickySectionHeadersEnabled={false}
+          renderSectionHeader={({ section }) => <SectionLabel>{section.title}</SectionLabel>}
+          renderItem={({ item }) => (
+            <ItemRow
+              item={item}
+              onToggle={() => {
+                toggleItem(item.id);
+                tap('light');
+              }}
+              onEdit={() => setEditor({ mode: 'edit', item })}
+            />
+          )}
+        />
+      )}
+
+      <View style={[styles.dock, { paddingBottom: Math.max(insets.bottom, 12) }]}>
+        <View style={styles.totalBlock}>
+          <Text style={styles.totalLabel}>No carrinho</Text>
+          <Text style={styles.totalValue}>{formatBRL(totalPrice)}</Text>
+          <Text style={styles.estimate}>Lista inteira {formatBRL(estimatedPrice)}</Text>
+        </View>
+        <View style={styles.actions}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Escanear etiqueta"
+            onPress={() => navigation.navigate('Scanner')}
+            style={({ pressed }) => [styles.action, styles.actionGhost, pressed && styles.pressed]}
+          >
+            <Feather name="camera" size={18} color={colors.mossDark} />
+            <Text style={styles.actionGhostText}>Escanear</Text>
+          </Pressable>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Falar a compra"
+            onPress={() => {
+              if (remaining('voice') === 0) {
+                Alert.alert('Frases do mês esgotadas', 'No grátis são 3 frases por mês. Um código premium libera a voz.');
+                return;
+              }
+              setVoice(true);
+            }}
+            style={({ pressed }) => [styles.action, styles.actionGhost, pressed && styles.pressed]}
+          >
+            <Feather name="mic" size={18} color={colors.mossDark} />
+            <Text style={styles.actionGhostText}>Falar</Text>
+          </Pressable>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Adicionar item"
+            onPress={() => setEditor({ mode: 'create' })}
+            style={({ pressed }) => [styles.action, styles.actionSolid, pressed && styles.pressed]}
+          >
+            <Feather name="plus" size={18} color={colors.cream} />
+            <Text style={styles.actionSolidText}>Item</Text>
+          </Pressable>
+        </View>
+      </View>
+
+      {editor && (
+        <ItemEditor
+          editor={editor}
+          onClose={() => setEditor(null)}
+          onSave={saveItem}
+          onDelete={() => {
+            if (editor.mode !== 'edit') return;
+            deleteItem(editor.item.id);
+            setEditor(null);
+            tap('warning');
+          }}
+        />
+      )}
+
+      <Sheet visible={menu} title="Opções" onClose={() => setMenu(false)}>
+        <Button
+          label={currentList.shared ? 'Lista da casa' : 'Abrir para a casa'}
+          tone="ghost"
+          onPress={() => {
+            setMenu(false);
+            setHouseOpen(true);
+          }}
+        />
+        <Button
+          label="Lembrar de comprar"
+          tone="ghost"
+          onPress={() => {
+            setMenu(false);
+            setReminderOpen(true);
+          }}
+        />
+        <Button
+          label={repeats.length ? `Repetições (${repeats.length})` : 'Compras que voltam'}
+          tone="ghost"
+          onPress={() => {
+            setMenu(false);
+            setRepeatOpen(true);
+          }}
+        />
+        <Button
+          label="Esvaziar lista"
+          tone="ghost"
+          onPress={confirmClear}
+          disabled={items.length === 0}
+        />
+        <Button label="Excluir lista" tone="danger" onPress={confirmDeleteList} />
+      </Sheet>
+
+      <VoiceSheet
+        visible={voice}
+        onClose={() => setVoice(false)}
+        onConfirm={(spoken, due) => {
+          void consume('voice').then((allowed) => {
+            if (!allowed) {
+              Alert.alert('Frases do mês esgotadas', 'No grátis são 3 frases por mês. Um código premium libera a voz.');
+              return;
+            }
+            for (const item of spoken) addSpoken(item);
+            if (due && currentList) {
+              void scheduleReminder(currentList.id, currentList.title, due)
+                .then((next) => {
+                  if (next) setReminder(next);
+                  else Alert.alert('Não marquei o aviso', 'Permita as notificações para lembrar dessa compra.');
+                })
+                .catch(() => {
+                  Alert.alert('Não marquei o aviso', 'Permita as notificações para lembrar dessa compra.');
+                });
+            }
+          });
+        }}
+      />
+      <ReminderSheet
+        visible={reminderOpen}
+        current={reminder}
+        onClose={() => setReminderOpen(false)}
+        onSchedule={(when) => {
+          if (!currentList) return;
+          void scheduleReminder(currentList.id, currentList.title, when)
+            .then((next) => {
+              setReminderOpen(false);
+              if (next) setReminder(next);
+              else Alert.alert('Não marquei o aviso', 'Escolha um horário que ainda não passou e permita as notificações.');
+            })
+            .catch(() => {
+              setReminderOpen(false);
+              Alert.alert('Não marquei o aviso', 'Escolha um horário que ainda não passou e permita as notificações.');
+            });
+        }}
+        onClear={() => {
+          if (!currentList) return;
+          void clearReminder(currentList.id).then(() => {
+            setReminder(null);
+            setReminderOpen(false);
+          });
+        }}
+      />
+      <HouseSheet
+        visible={houseOpen}
+        shared={Boolean(currentList.shared)}
+        onClose={() => setHouseOpen(false)}
+      />
+      {currentList && (
+        <RecurringSheet
+          visible={repeatOpen}
+          listId={currentList.id}
+          onClose={() => setRepeatOpen(false)}
+          onChanged={() => void refreshExtras()}
+        />
+      )}
+    </View>
+  );
+}
+
+function ItemRow({
+  item,
+  onToggle,
+  onEdit,
+}: {
+  item: Item;
+  onToggle: () => void;
+  onEdit: () => void;
+}) {
+  const line = item.price * item.unities;
+  return (
+    <View style={[styles.row, item.isCompleted && styles.rowDone]}>
+      <Pressable
+        accessibilityRole="checkbox"
+        accessibilityState={{ checked: item.isCompleted }}
+        accessibilityLabel={item.isCompleted ? 'Tirar do carrinho' : 'Colocar no carrinho'}
+        onPress={onToggle}
+        style={[styles.check, item.isCompleted && styles.checkOn]}
+      >
+        {item.isCompleted && <Feather name="check" size={16} color={colors.cream} />}
+      </Pressable>
+      <Pressable onPress={onEdit} style={styles.rowBody}>
+        <Text style={[styles.itemTitle, item.isCompleted && styles.itemDone]} numberOfLines={2}>
+          {item.title}
+        </Text>
+        <Text style={styles.itemMeta}>
+          {item.note ?? `${item.unities} un`}
+          {item.store ? ` · ${item.store}` : ''}
+          {item.unities > 1 && item.price > 0 ? ` · ${formatBRL(item.price)} cada` : ''}
+        </Text>
+      </Pressable>
+      <Text style={[styles.itemPrice, line <= 0 && styles.itemMissing]}>
+        {line > 0 ? formatBRL(line) : 'sem preço'}
+      </Text>
+    </View>
+  );
+}
+
+function ItemEditor({
+  editor,
+  onClose,
+  onSave,
+  onDelete,
+}: {
+  editor: Exclude<EditorState, null>;
+  onClose: () => void;
+  onSave: (draft: { title: string; price: number; unities: number; store: string }) => void;
+  onDelete: () => void;
+}) {
+  const initial = editor.mode === 'edit' ? editor.item : null;
+  const [title, setTitle] = useState(initial?.title ?? '');
+  const [price, setPrice] = useState(initial?.price ?? 0);
+  const [unities, setUnities] = useState(initial?.unities ?? 1);
+  const [store, setStore] = useState(initial?.store ?? '');
+  const [history, setHistory] = useState<PriceRecord[]>([]);
+
+  useEffect(() => {
+    const name = title.trim();
+    if (name.length < 2) {
+      setHistory([]);
+      return undefined;
+    }
+    const timer = setTimeout(() => {
+      void pricesFor(name, initial?.barcode).then(setHistory);
+    }, 200);
+    return () => clearTimeout(timer);
+  }, [title, initial?.barcode]);
+
+  return (
+    <Sheet
+      visible
+      title={editor.mode === 'create' ? 'Novo item' : 'Editar item'}
+      subtitle={editor.mode === 'create' ? 'O preço pode ficar para a hora da etiqueta.' : undefined}
+      onClose={onClose}
+    >
+      <ItemFields
+        title={title}
+        price={price}
+        unities={unities}
+        priceKey={initial?.id ?? 'new'}
+        onChangeTitle={setTitle}
+        onChangePrice={setPrice}
+        onChangeUnities={setUnities}
+        store={store}
+        onChangeStore={setStore}
+      />
+      {history[0] && (
+        <Text style={styles.history}>
+          Última vez: {formatBRL(history[0].price)}
+          {history[0].store ? ` no ${history[0].store}` : ''}
+          {history.length > 1 ? ` · ${history.length} preços guardados` : ''}
+        </Text>
+      )}
+      <Button
+        label={editor.mode === 'create' ? 'Adicionar' : 'Salvar'}
+        onPress={() => onSave({ title, price, unities, store })}
+        disabled={!title.trim()}
+      />
+      {editor.mode === 'edit' && (
+        <Button label="Excluir item" tone="danger" onPress={onDelete} />
+      )}
+    </Sheet>
+  );
 }
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-    },
-
-    headerText: {
-        color: WhiteColor,
-        fontSize: 18,
-    },
-
-    inputBlock: {
-        flex: 1,
-        marginRight: 10,
-    },
-
-    bigInputBlock: {
-        flex: 2,
-    },
-
-    smallLabel: {
-        fontSize: 11,
-    },
-
-    modalBtnContainer: {
-        flexDirection: 'row',
-    },
-
-    totalPrice: {
-        position: 'absolute',
-        bottom: 10,
-        left: 0,
-        padding: 25,
-        width: '60%'
-    },
-
-    totalPriceText: {
-        fontSize: 20
-    },
-
-    totalPriceNumber: {
-        fontSize: 28
-    }
-})
+  screen: {
+    flex: 1,
+    backgroundColor: colors.paper,
+  },
+  list: {
+    flex: 1,
+  },
+  header: {
+    paddingHorizontal: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  headerText: {
+    flex: 1,
+    gap: 2,
+  },
+  title: {
+    fontFamily: fonts.display,
+    fontSize: 28,
+    color: colors.ink,
+  },
+  subtitle: {
+    fontFamily: fonts.medium,
+    fontSize: 14,
+    color: colors.inkSoft,
+  },
+  progressWrap: {
+    paddingHorizontal: 20,
+    paddingTop: 16,
+    paddingBottom: 8,
+  },
+  track: {
+    height: 6,
+    borderRadius: 99,
+    backgroundColor: colors.paperDeep,
+    overflow: 'hidden',
+  },
+  fill: {
+    height: '100%',
+    backgroundColor: colors.moss,
+  },
+  empty: {
+    flex: 1,
+    paddingHorizontal: 20,
+    paddingTop: 28,
+    gap: 10,
+  },
+  emptyTitle: {
+    fontFamily: fonts.display,
+    fontSize: 32,
+    color: colors.ink,
+  },
+  emptyText: {
+    fontFamily: fonts.body,
+    fontSize: 16,
+    lineHeight: 23,
+    color: colors.inkSoft,
+    maxWidth: 360,
+  },
+  row: {
+    backgroundColor: colors.card,
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: colors.line,
+    padding: 12,
+    marginBottom: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  rowDone: {
+    backgroundColor: colors.mossSoft,
+    borderColor: 'transparent',
+  },
+  check: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    borderWidth: 1.5,
+    borderColor: colors.moss,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  checkOn: {
+    backgroundColor: colors.moss,
+  },
+  rowBody: {
+    flex: 1,
+    gap: 2,
+  },
+  itemTitle: {
+    fontFamily: fonts.semibold,
+    fontSize: 16,
+    color: colors.ink,
+  },
+  itemDone: {
+    textDecorationLine: 'line-through',
+    color: colors.inkSoft,
+  },
+  itemMeta: {
+    fontFamily: fonts.body,
+    fontSize: 13,
+    color: colors.mute,
+  },
+  history: {
+    fontFamily: fonts.body,
+    fontSize: 14,
+    lineHeight: 20,
+    color: colors.inkSoft,
+  },
+  itemPrice: {
+    fontFamily: fonts.semibold,
+    fontSize: 14,
+    color: colors.ink,
+    fontVariant: ['tabular-nums'],
+  },
+  itemMissing: {
+    color: colors.clay,
+    fontFamily: fonts.medium,
+  },
+  dock: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: colors.card,
+    borderTopWidth: 1,
+    borderTopColor: colors.line,
+    paddingHorizontal: 16,
+    paddingTop: 12,
+    gap: 12,
+  },
+  totalBlock: {
+    gap: 1,
+  },
+  totalLabel: {
+    fontFamily: fonts.semibold,
+    fontSize: 12,
+    letterSpacing: 0.6,
+    textTransform: 'uppercase',
+    color: colors.mute,
+  },
+  totalValue: {
+    fontFamily: fonts.display,
+    fontSize: 34,
+    color: colors.ink,
+    fontVariant: ['tabular-nums'],
+  },
+  estimate: {
+    fontFamily: fonts.medium,
+    fontSize: 13,
+    color: colors.inkSoft,
+  },
+  actions: {
+    flexDirection: 'row',
+    gap: 10,
+  },
+  action: {
+    flex: 1,
+    minHeight: 52,
+    borderRadius: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+  },
+  actionGhost: {
+    backgroundColor: colors.mossSoft,
+  },
+  actionSolid: {
+    backgroundColor: colors.moss,
+  },
+  actionGhostText: {
+    fontFamily: fonts.semibold,
+    fontSize: 16,
+    color: colors.mossDark,
+  },
+  actionSolidText: {
+    fontFamily: fonts.semibold,
+    fontSize: 16,
+    color: colors.cream,
+  },
+  pressed: {
+    opacity: 0.82,
+  },
+});
