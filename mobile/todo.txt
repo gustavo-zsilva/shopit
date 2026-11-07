@@ -1,0 +1,16 @@
+A assinatura só para em pé se a versão grátis continuar sendo um app de mercado completo. O que vale cobrar é o que junta a casa inteira e o que mostra se a compra está ficando mais cara.
+
+Hoje o Shopit vive só no celular: listas, nome pelo código, preço digitado, último preço, lembrete, repetição e a frase falada. Isso tem que continuar grátis. Travar lista, código ou o preço em si faz o app parecer uma amostra.
+
+Eu colocaria no premium três coisas, nessa ordem:
+
+Lista da casa. Duas pessoas na mesma lista, uma em casa e outra no mercado. É o motivo real pelo qual gente paga app de compra, e é o que justifica o servidor. Sem isso, a assinatura é um cadeado em cima de algo que já funciona offline.
+Memória de preço. O app já guarda o último valor. O premium guarda o histórico: “esse arroz estava R$ 4,99 na última vez”, gasto do mês e, quando fizer sentido, o mercado em que foi pago. É o que faz a pessoa renovar depois da novidade passar.
+
+Voz e preço na embalagem sem limite. A frase falada e a foto do preço são a demonstração. No grátis, algumas por mês. No premium, à vontade. Se a frase for interpretada na nuvem, isso ainda te custa dinheiro por uso, então o limite grátis se paga sozinho.
+
+Em volta disso, a conta entra junto: a lista não some se o celular quebrar, e sincroniza. Backup sozinho é fraco para vender; junto com a lista compartilhada, vira o plano.
+
+Eu deixaria de fora do cadeado: criar lista, digitar item, marcar o que já está no carrinho, um lembrete por lista e umas poucas repetições. Tema, ícone e “listas ilimitadas” não sustentam mensalidade.
+
+No Brasil, um plano anual converte melhor que o mensal. Algo na faixa de R$ 9,90 por mês ou R$ 59 a R$ 79 por ano, com uma semana de teste. A cobrança em si é Play Store e App Store, com uma camada tipo RevenueCat para saber quem está pago. A lista compartilhada e o histórico precisam de um servidor seu. O resto do app pode continuar funcionando sem internet.
