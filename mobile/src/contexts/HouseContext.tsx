@@ -10,7 +10,7 @@ import { ActivityEntry, HouseResult, ItemOp, Member, PresencePerson, SharedList 
 import { enqueueStorage } from '../utils/storageQueue';
 import { loadProfile, loadServerUrl, Profile, saveProfile, saveServerUrl } from '../utils/identity';
 import { consumeQuota, Quota, QuotaKind, readQuota, remainingUses } from '../utils/quota';
-import { Item } from '../types';
+import { Category, Item } from '../types';
 
 type HouseRoom = {
   listId: string;
@@ -40,12 +40,13 @@ type HouseContextValue = {
 
 const HouseContext = createContext<HouseContextValue | null>(null);
 
-async function writeItems(listId: string, items: Item[]) {
+async function writeItems(listId: string, items: Item[], categories: Category[]) {
   await enqueueStorage(async () => {
     const raw = await AsyncStorage.getItem('items');
-    const all = raw ? JSON.parse(raw) as { id: string; items: Item[] }[] : [];
+    const all = raw ? JSON.parse(raw) as { id: string; items: Item[]; categories?: Category[] }[] : [];
     const index = all.findIndex((entry) => entry.id === listId);
-    const next = { id: listId, items };
+    const previous = index === -1 ? undefined : all[index];
+    const next = { ...previous, id: listId, items, categories };
     if (index === -1) all.push(next);
     else all[index] = next;
     await AsyncStorage.setItem('items', JSON.stringify(all));
@@ -54,7 +55,7 @@ async function writeItems(listId: string, items: Item[]) {
 
 export function HouseProvider({ children }: { children: ReactNode }) {
   const { lists, currentList, addList, patchList, forgetList, refreshStats, setOpenList } = useLists();
-  const { items, replaceItems } = useItems();
+  const { items, categories, replaceItems } = useItems();
   const [status, setStatus] = useState<'off' | 'connecting' | 'online'>('off');
   const [me, setMe] = useState<Profile | null>(null);
   const [premium, setPremium] = useState(false);
@@ -68,12 +69,14 @@ export function HouseProvider({ children }: { children: ReactNode }) {
   const addingRef = useRef(false);
   const listsRef = useRef(lists);
   const itemsRef = useRef(items);
+  const categoriesRef = useRef(categories);
   const currentRef = useRef(currentList);
   const meRef = useRef(me);
   const applyRef = useRef<(list: SharedList, people: PresencePerson[]) => Promise<void>>(async () => undefined);
   const forgetRef = useRef(forgetList);
   listsRef.current = lists;
   itemsRef.current = items;
+  categoriesRef.current = categories;
   currentRef.current = currentList;
   meRef.current = me;
   forgetRef.current = forgetList;
@@ -104,9 +107,9 @@ export function HouseProvider({ children }: { children: ReactNode }) {
       patchList(list.id, patch);
     }
 
-    if (currentRef.current?.id === list.id) replaceItems(list.items);
+    if (currentRef.current?.id === list.id) replaceItems(list.items, list.categories ?? []);
     else {
-      await writeItems(list.id, list.items);
+      await writeItems(list.id, list.items, list.categories ?? []);
       await refreshStats();
     }
   }, [addList, patchList, refreshStats, replaceItems]);
@@ -308,6 +311,7 @@ export function HouseProvider({ children }: { children: ReactNode }) {
         title: list.title,
         createdAt: list.createdAt,
         items: itemsRef.current,
+        categories: categoriesRef.current,
       },
     });
     if (!result.ok || !result.list) return result.error ?? 'Não consegui abrir a lista.';

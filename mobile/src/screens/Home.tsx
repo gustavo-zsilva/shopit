@@ -20,6 +20,7 @@ import { colors, fonts } from '../theme';
 import { formatBRL, formatDate } from '../utils/format';
 import { tap } from '../utils/haptics';
 import { Button, Field } from '../components/ui';
+import { FadeIn, ProgressBar } from '../components/motion';
 import { Sheet } from '../components/Sheet';
 import { AccountSheet } from '../components/AccountSheet';
 
@@ -106,6 +107,7 @@ export default function Home() {
 
   return (
     <View style={styles.screen}>
+      <FadeIn style={styles.list}>
       <FlatList
         data={lists}
         keyExtractor={(item) => item.id}
@@ -159,9 +161,7 @@ export default function Home() {
                   <Text style={styles.cardMeta}>Nenhum item ainda</Text>
                 ) : (
                   <>
-                    <View style={styles.track}>
-                      <View style={[styles.fill, { width: `${Math.round(progress * 100)}%` }]} />
-                    </View>
+                    <ProgressBar value={progress} />
                     <View style={styles.cardBottom}>
                       <Text style={styles.cardMeta}>
                         {info.done} de {info.count} no carrinho
@@ -200,6 +200,7 @@ export default function Home() {
           </View>
         }
       />
+      </FadeIn>
 
       <View style={[styles.dock, { paddingBottom: Math.max(insets.bottom, 12) }]}>
         <Button label="Nova lista" icon="plus" onPress={() => setCreating(true)} />
@@ -333,17 +334,6 @@ const styles = StyleSheet.create({
     fontFamily: fonts.medium,
     fontSize: 13,
     color: colors.mute,
-  },
-  track: {
-    height: 6,
-    borderRadius: 99,
-    backgroundColor: colors.paperDeep,
-    overflow: 'hidden',
-  },
-  fill: {
-    height: '100%',
-    backgroundColor: colors.moss,
-    borderRadius: 99,
   },
   cardBottom: {
     flexDirection: 'row',

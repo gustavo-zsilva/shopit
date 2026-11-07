@@ -1,3 +1,12 @@
+import { CategoryIcon } from './categories';
+
+export type Category = {
+  id: string;
+  name: string;
+  color: string;
+  icon: CategoryIcon;
+};
+
 export type ShoppingList = {
   id: string;
   title: string;
@@ -16,6 +25,7 @@ export type Item = {
   barcode?: string;
   note?: string;
   store?: string;
+  categoryId?: string;
 };
 
 export type RecurringPurchase = {

@@ -20,7 +20,11 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.gustavosilva.shopapp"
+      "bundleIdentifier": "com.gustavosilva.shopapp",
+      "infoPlist": {
+        "NSSpeechRecognitionUsageDescription": "O Shopit transforma o que você fala em itens da lista.",
+        "NSMicrophoneUsageDescription": "O Shopit usa o microfone para anotar o que você precisa comprar."
+      }
     },
     "android": {
       "package": "com.gustavosilva.shopapp",
@@ -29,7 +33,11 @@
       "adaptiveIcon": {
         "foregroundImage": "./src/assets/adaptive-icon.png",
         "backgroundColor": "#F4EFE6"
-      }
+      },
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO"
+      ]
     },
     "web": {
       "favicon": "./src/assets/favicon.png"
@@ -49,12 +57,19 @@
         {
           "microphonePermission": "O Shopit usa o microfone para anotar o que você precisa comprar.",
           "speechRecognitionPermission": "O Shopit transforma o que você fala em itens da lista.",
-          "androidSpeechServicePackages": ["com.google.android.googlequicksearchbox"]
+          "androidSpeechServicePackages": [
+            "com.google.android.googlequicksearchbox"
+          ]
         }
       ],
       "expo-ocr-kit",
       "expo-status-bar"
     ],
-    "description": "Listas de compra com preço, no celular."
+    "description": "Listas de compra com preço, no celular.",
+    "extra": {
+      "eas": {
+        "projectId": "2be03a94-231b-485f-9104-ef8fa567642d"
+      }
+    }
   }
 }

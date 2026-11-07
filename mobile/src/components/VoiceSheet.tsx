@@ -5,6 +5,7 @@ import { Sheet } from './Sheet';
 import { Button, Field } from './ui';
 import { colors, fonts } from '../theme';
 import { parseSpeech, SpokenItem } from '../utils/parseSpeech';
+import { formatBRL } from '../utils/format';
 import { describeWhen } from '../utils/reminders';
 import { tap } from '../utils/haptics';
 
@@ -129,7 +130,7 @@ export function VoiceSheet({ visible, onClose, onConfirm }: VoiceSheetProps) {
         <View style={styles.preview}>
           {parsed.items.map((item) => (
             <Text key={`${item.title}-${item.note ?? ''}`} style={styles.previewItem}>
-              {item.note ? `${item.note} de ${item.title}` : item.title}
+              {`${item.note ? `${item.note} de ${item.title}` : item.title}${item.price ? ` · ${formatBRL(item.price)}` : ''}`}
             </Text>
           ))}
           {parsed.due && (

@@ -1,4 +1,4 @@
-import { Item } from '../types';
+import { Category, Item } from '../types';
 
 export type Member = {
   userId: string;
@@ -28,6 +28,7 @@ export type SharedList = {
   inviteCode: string;
   members: Member[];
   items: Item[];
+  categories?: Category[];
   activity: ActivityEntry[];
 };
 
@@ -35,7 +36,9 @@ export type ItemOp =
   | { kind: 'add'; item: Item }
   | { kind: 'edit'; item: Item }
   | { kind: 'remove'; itemId: string; title: string }
-  | { kind: 'clear' };
+  | { kind: 'clear' }
+  | { kind: 'category'; category: Category }
+  | { kind: 'drop-category'; categoryId: string; name: string };
 
 export type HouseResult = {
   ok: boolean;

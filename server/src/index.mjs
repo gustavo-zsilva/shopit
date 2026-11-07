@@ -92,7 +92,17 @@ function sanitizeItem(value) {
     barcode: typeof value.barcode === 'string' ? value.barcode : undefined,
     note: note || undefined,
     store: store || undefined,
+    categoryId: typeof value.categoryId === 'string' && value.categoryId ? String(value.categoryId) : undefined,
   };
+}
+
+function sanitizeCategory(value) {
+  if (!value?.id || typeof value.name !== 'string') return null;
+  const name = value.name.trim().slice(0, 24);
+  const color = typeof value.color === 'string' && /^#[0-9A-Fa-f]{6}$/.test(value.color) ? value.color : '#1B6B4A';
+  const icon = typeof value.icon === 'string' && /^[a-z0-9-]{1,40}$/.test(value.icon) ? value.icon : 'shopping-bag';
+  if (!name) return null;
+  return { id: String(value.id), name, color, icon };
 }
 
 function listView(list) {
@@ -104,6 +114,7 @@ function listView(list) {
     inviteCode: list.inviteCode,
     members: list.members,
     items: list.items,
+    categories: list.categories ?? [],
     activity: list.activity,
   };
 }
@@ -250,6 +261,7 @@ function onMessage(socket, message) {
         inviteCode: makeInviteCode(),
         members: [{ userId: socket.user.id, name: socket.user.name, role: 'owner' }],
         items: (Array.isArray(incoming.items) ? incoming.items : []).map(sanitizeItem).filter(Boolean),
+        categories: (Array.isArray(incoming.categories) ? incoming.categories : []).map(sanitizeCategory).filter(Boolean).slice(0, 12),
         activity: [],
       };
       pushActivity(list, socket.user, 'abriu a lista para a casa');
@@ -324,7 +336,19 @@ function onMessage(socket, message) {
       else {
         const previous = list.items[index];
         list.items[index] = item;
-        pushActivity(list, socket.user, describeEdit(previous, item));
+        const onlyMoved = (previous.categoryId || '') !== (item.categoryId || '')
+          && previous.title === item.title
+          && previous.price === item.price
+          && (previous.store || '') === (item.store || '')
+          && previous.isCompleted === item.isCompleted
+          && previous.unities === item.unities
+          && (previous.note || '') === (item.note || '');
+        if (onlyMoved) {
+          const target = (list.categories ?? []).find((category) => category.id === item.categoryId);
+          pushActivity(list, socket.user, target ? `moveu ${item.title} para ${target.name}` : `tirou ${item.title} da categoria`);
+        } else {
+          pushActivity(list, socket.user, describeEdit(previous, item));
+        }
       }
       if (index === -1) pushActivity(list, socket.user, `adicionou ${item.title}`);
     } else if (op.kind === 'remove') {
@@ -334,6 +358,27 @@ function onMessage(socket, message) {
     } else if (op.kind === 'clear') {
       list.items = [];
       pushActivity(list, socket.user, 'esvaziou a lista');
+    } else if (op.kind === 'category') {
+      const category = sanitizeCategory(op.category);
+      if (!category) return fail(socket, message.requestId, 'Categoria incompleta.');
+      list.categories = list.categories ?? [];
+      const index = list.categories.findIndex((current) => current.id === category.id);
+      if (index === -1) {
+        if (list.categories.length >= 12) return fail(socket, message.requestId, 'Dá para ter até 12 categorias.');
+        list.categories.push(category);
+        pushActivity(list, socket.user, `criou a categoria ${category.name}`);
+      } else {
+        list.categories[index] = category;
+        pushActivity(list, socket.user, `ajustou a categoria ${category.name}`);
+      }
+    } else if (op.kind === 'drop-category') {
+      const id = String(op.categoryId || '');
+      const name = (list.categories ?? []).find((category) => category.id === id)?.name || op.name || 'uma categoria';
+      list.categories = (list.categories ?? []).filter((category) => category.id !== id);
+      for (const item of list.items) {
+        if (item.categoryId === id) delete item.categoryId;
+      }
+      pushActivity(list, socket.user, `removeu a categoria ${name}`);
     } else {
       return fail(socket, message.requestId, 'Não entendi a alteração.');
     }

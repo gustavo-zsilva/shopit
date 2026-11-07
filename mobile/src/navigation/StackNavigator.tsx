@@ -19,6 +19,7 @@ export default function StackNavigator() {
           headerShown: false,
           contentStyle: { backgroundColor: colors.paper },
           animation: 'slide_from_right',
+          animationDuration: 320,
         }}
       >
         <Stack.Screen name="Home" component={Home} />

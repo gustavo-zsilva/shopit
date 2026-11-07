@@ -1,6 +1,8 @@
-import React, { ReactNode, useEffect, useState } from 'react';
+import React, { ReactNode, useEffect, useRef, useState } from 'react';
 import {
+  Animated,
   BackHandler,
+  Easing,
   Keyboard,
   Platform,
   Pressable,
@@ -26,6 +28,26 @@ export function Sheet({ visible, title, subtitle, onClose, children }: SheetProp
   const insets = useSafeAreaInsets();
   const { height } = useWindowDimensions();
   const [keyboardOverlap, setKeyboardOverlap] = useState(0);
+  const [mounted, setMounted] = useState(visible);
+  const progress = useRef(new Animated.Value(visible ? 1 : 0)).current;
+
+  useEffect(() => {
+    let active = true;
+    if (visible) setMounted(true);
+    const animation = Animated.timing(progress, {
+      toValue: visible ? 1 : 0,
+      duration: visible ? 260 : 180,
+      easing: visible ? Easing.out(Easing.cubic) : Easing.in(Easing.cubic),
+      useNativeDriver: true,
+    });
+    animation.start(({ finished }) => {
+      if (!visible && active && finished) setMounted(false);
+    });
+    return () => {
+      active = false;
+      animation.stop();
+    };
+  }, [visible, progress]);
 
   useEffect(() => {
     if (!visible) {
@@ -57,16 +79,22 @@ export function Sheet({ visible, title, subtitle, onClose, children }: SheetProp
     };
   }, [visible, height]);
 
-  if (!visible) return null;
+  if (!mounted) return null;
 
   const bottomGap = keyboardOverlap > 0 ? 8 : Math.max(insets.bottom, 16);
   const available = Math.max(220, height - keyboardOverlap - bottomGap - 12);
+  const translateY = progress.interpolate({
+    inputRange: [0, 1],
+    outputRange: [28, 0],
+  });
 
   return (
-    <View style={styles.overlay} pointerEvents="box-none">
-      <Pressable style={styles.backdrop} onPress={onClose} accessibilityLabel="Fechar" />
+    <View style={styles.overlay} pointerEvents={visible ? 'box-none' : 'none'}>
+      <Animated.View style={[styles.backdrop, { opacity: progress }]}>
+        <Pressable style={styles.backdropPress} onPress={onClose} accessibilityLabel="Fechar" />
+      </Animated.View>
       <View style={{ marginBottom: keyboardOverlap }}>
-        <View style={[styles.sheet, { maxHeight: available, paddingBottom: bottomGap }]}>
+        <Animated.View style={[styles.sheet, { maxHeight: available, paddingBottom: bottomGap, opacity: progress, transform: [{ translateY }] }]}>
           <ScrollView
             keyboardShouldPersistTaps="handled"
             bounces={false}
@@ -78,7 +106,7 @@ export function Sheet({ visible, title, subtitle, onClose, children }: SheetProp
             {subtitle ? <Text style={styles.subtitle}>{subtitle}</Text> : null}
             <View style={styles.body}>{children}</View>
           </ScrollView>
-        </View>
+        </Animated.View>
       </View>
     </View>
   );
@@ -101,6 +129,9 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     backgroundColor: 'rgba(20, 18, 15, 0.46)',
+  },
+  backdropPress: {
+    flex: 1,
   },
   sheet: {
     backgroundColor: colors.card,

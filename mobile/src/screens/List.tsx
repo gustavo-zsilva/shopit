@@ -1,12 +1,14 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   Alert,
   Pressable,
+  ScrollView,
   SectionList,
   StyleSheet,
   Text,
   View,
 } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -16,11 +18,15 @@ import { Feather } from '@expo/vector-icons';
 import { useLists } from '../contexts/ListContext';
 import { useItems } from '../contexts/ItemContext';
 import { RootStackParamList } from '../navigation/types';
-import { Item } from '../types';
+import { Category, Item } from '../types';
 import { colors, fonts } from '../theme';
 import { formatBRL } from '../utils/format';
 import { tap } from '../utils/haptics';
 import { Button, IconButton, SectionLabel } from '../components/ui';
+import { CategoryCard, ProductRow, categorySummary } from '../components/CategoryCard';
+import { CategoryPicker, CategorySheet } from '../components/CategorySheet';
+import { FadeIn, ProgressBar } from '../components/motion';
+import { CategoryIcon, MAX_CATEGORIES } from '../categories';
 import { Sheet } from '../components/Sheet';
 import { ItemFields } from '../components/ItemFields';
 import { VoiceSheet } from '../components/VoiceSheet';
@@ -47,13 +53,21 @@ export default function ListScreen() {
     items,
     totalPrice,
     estimatedPrice,
+    categories,
     addItem,
     updateItem,
+    moveItem,
     toggleItem,
     deleteItem,
     clearItems,
+    addCategory,
+    updateCategory,
+    deleteCategory,
   } = useItems();
   const [editor, setEditor] = useState<EditorState>(null);
+  const [folded, setFolded] = useState<Record<string, boolean>>({});
+  const [moving, setMoving] = useState<Item | null>(null);
+  const [categoryEditor, setCategoryEditor] = useState<Category | 'new' | null>(null);
   const [menu, setMenu] = useState(false);
   const [voice, setVoice] = useState(false);
   const [reminderOpen, setReminderOpen] = useState(false);
@@ -82,6 +96,39 @@ export default function ListScreen() {
   }, [currentList?.id]);
 
   useEffect(() => {
+    if (!currentList) return undefined;
+    let cancel = false;
+    AsyncStorage.getItem('categoryFolds')
+      .then((raw) => {
+        if (cancel || !raw) return;
+        const all = JSON.parse(raw) as Record<string, string[]>;
+        const ids = Array.isArray(all[currentList.id]) ? all[currentList.id] : [];
+        const next: Record<string, boolean> = {};
+        for (const id of ids) next[id] = true;
+        setFolded(next);
+      })
+      .catch(() => undefined);
+    return () => {
+      cancel = true;
+    };
+  }, [currentList?.id]);
+
+  function toggleFold(id: string) {
+    if (!currentList) return;
+    setFolded((current) => {
+      const next = { ...current, [id]: !current[id] };
+      const ids = Object.entries(next).filter(([, closed]) => closed).map(([key]) => key);
+      void AsyncStorage.getItem('categoryFolds').then((raw) => {
+        const all = raw ? JSON.parse(raw) as Record<string, string[]> : {};
+        all[currentList.id] = ids;
+        return AsyncStorage.setItem('categoryFolds', JSON.stringify(all));
+      }).catch(() => undefined);
+      return next;
+    });
+    tap('light');
+  }
+
+  useEffect(() => {
     setAdding(voice || editor !== null);
     return () => setAdding(false);
   }, [voice, editor, setAdding]);
@@ -93,7 +140,7 @@ export default function ListScreen() {
     done.length ? { title: 'No carrinho', data: done } : null,
   ].filter((section): section is { title: string; data: Item[] } => section !== null);
 
-  function saveItem(draft: { title: string; price: number; unities: number; store: string }) {
+  function saveItem(draft: { title: string; price: number; unities: number; store: string; categoryId: string | null }) {
     const title = draft.title.trim();
     if (!title || !editor) return;
     const unities = Math.max(1, Math.round(draft.unities) || 1);
@@ -107,10 +154,11 @@ export default function ListScreen() {
         price,
         unities,
         store,
+        categoryId: draft.categoryId || undefined,
         isCompleted: false,
       });
     } else {
-      updateItem(editor.item.id, { title, price, unities, store });
+      updateItem(editor.item.id, { title, price, unities, store, categoryId: draft.categoryId });
     }
 
     setEditor(null);
@@ -121,7 +169,7 @@ export default function ListScreen() {
     addItem({
       id: Crypto.randomUUID(),
       title: item.title,
-      price: 0,
+      price: item.price ?? 0,
       unities: item.unities,
       note: item.note,
       isCompleted: false,
@@ -167,9 +215,54 @@ export default function ListScreen() {
     );
   }
 
+  function saveCategory(draft: { name: string; color: string; icon: CategoryIcon }) {
+    if (categoryEditor && categoryEditor !== 'new') {
+      updateCategory({ ...categoryEditor, ...draft, name: draft.name.trim() });
+      setCategoryEditor(null);
+      tap('success');
+      return;
+    }
+    if (categories.length >= MAX_CATEGORIES) {
+      Alert.alert('Limite de categorias', 'Dá para ter até 12 categorias nesta lista.');
+      return;
+    }
+    const created = addCategory({
+      id: Crypto.randomUUID(),
+      name: draft.name.trim(),
+      color: draft.color,
+      icon: draft.icon,
+    });
+    if (!created) {
+      Alert.alert('Limite de categorias', 'Dá para ter até 12 categorias nesta lista.');
+      return;
+    }
+    setCategoryEditor(null);
+    tap('success');
+  }
+
+  function confirmDeleteCategory(category: Category) {
+    Alert.alert(
+      'Excluir esta categoria?',
+      'Os produtos continuam na lista. Eles só saem desse grupo.',
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        {
+          text: 'Excluir',
+          style: 'destructive',
+          onPress: () => {
+            deleteCategory(category.id);
+            setCategoryEditor(null);
+            tap('warning');
+          },
+        },
+      ],
+    );
+  }
+
   if (!currentList) return <View style={styles.screen} />;
 
   const progress = items.length === 0 ? 0 : done.length / items.length;
+  const loose = items.filter((item) => !categories.some((category) => category.id === item.categoryId));
 
   return (
     <View style={styles.screen}>
@@ -196,19 +289,28 @@ export default function ListScreen() {
       </View>
 
       <View style={styles.progressWrap}>
-        <View style={styles.track}>
-          <View style={[styles.fill, { width: `${Math.round(progress * 100)}%` }]} />
-        </View>
+        <ProgressBar value={progress} />
+        {categories.length === 0 && (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Organizar em categorias"
+            onPress={() => setCategoryEditor('new')}
+            hitSlop={8}
+            style={styles.organize}
+          >
+            <Text style={styles.organizeText}>Organizar em categorias</Text>
+          </Pressable>
+        )}
       </View>
 
-      {items.length === 0 ? (
+      {items.length === 0 && categories.length === 0 ? (
         <View style={styles.empty}>
           <Text style={styles.emptyTitle}>Nada nesta lista</Text>
           <Text style={styles.emptyText}>
             Fale a compra, escaneie o código ou digite o item. Marque quando ele entrar no carrinho — o total de baixo soma só esses.
           </Text>
         </View>
-      ) : (
+      ) : categories.length === 0 ? (
         <SectionList
           sections={sections}
           keyExtractor={(item) => item.id}
@@ -217,7 +319,7 @@ export default function ListScreen() {
           stickySectionHeadersEnabled={false}
           renderSectionHeader={({ section }) => <SectionLabel>{section.title}</SectionLabel>}
           renderItem={({ item }) => (
-            <ItemRow
+            <ProductRow
               item={item}
               onToggle={() => {
                 toggleItem(item.id);
@@ -227,9 +329,70 @@ export default function ListScreen() {
             />
           )}
         />
+      ) : (
+        <ScrollView
+          style={styles.list}
+          contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: insets.bottom + 170, paddingTop: 8 }}
+        >
+          {categories.map((category) => {
+            const group = items.filter((item) => item.categoryId === category.id);
+            const summary = categorySummary(group);
+            return (
+              <CategoryCard
+                key={category.id}
+                name={category.name}
+                color={category.color}
+                icon={category.icon}
+                summary={summary.label}
+                open={!folded[category.id]}
+                onToggle={() => toggleFold(category.id)}
+                onEdit={() => setCategoryEditor(category)}
+                empty={group.length === 0 ? 'Mova um produto para cá.' : undefined}
+              >
+                {group.map((item) => (
+                  <ProductRow
+                    key={item.id}
+                    grouped
+                    item={item}
+                    onToggle={() => {
+                      toggleItem(item.id);
+                      tap('light');
+                    }}
+                    onEdit={() => setEditor({ mode: 'edit', item })}
+                    onMove={() => setMoving(item)}
+                  />
+                ))}
+              </CategoryCard>
+            );
+          })}
+          {loose.length > 0 && (
+            <CategoryCard
+              name="Sem categoria"
+              color={colors.mute}
+              icon="tag"
+              summary={categorySummary(loose).label}
+              open={!folded.loose}
+              onToggle={() => toggleFold('loose')}
+            >
+              {loose.map((item) => (
+                <ProductRow
+                  key={item.id}
+                  grouped
+                  item={item}
+                  onToggle={() => {
+                    toggleItem(item.id);
+                    tap('light');
+                  }}
+                  onEdit={() => setEditor({ mode: 'edit', item })}
+                  onMove={() => setMoving(item)}
+                />
+              ))}
+            </CategoryCard>
+          )}
+        </ScrollView>
       )}
 
-      <View style={[styles.dock, { paddingBottom: Math.max(insets.bottom, 12) }]}>
+      <FadeIn style={[styles.dock, { paddingBottom: Math.max(insets.bottom, 12) }]} delay={40}>
         <View style={styles.totalBlock}>
           <Text style={styles.totalLabel}>No carrinho</Text>
           <Text style={styles.totalValue}>{formatBRL(totalPrice)}</Text>
@@ -270,23 +433,30 @@ export default function ListScreen() {
             <Text style={styles.actionSolidText}>Item</Text>
           </Pressable>
         </View>
-      </View>
+      </FadeIn>
 
-      {editor && (
-        <ItemEditor
-          editor={editor}
-          onClose={() => setEditor(null)}
-          onSave={saveItem}
-          onDelete={() => {
-            if (editor.mode !== 'edit') return;
-            deleteItem(editor.item.id);
-            setEditor(null);
-            tap('warning');
-          }}
-        />
-      )}
+      <ItemEditor
+        editor={editor}
+        categories={categories}
+        onClose={() => setEditor(null)}
+        onSave={saveItem}
+        onDelete={() => {
+          if (!editor || editor.mode !== 'edit') return;
+          deleteItem(editor.item.id);
+          setEditor(null);
+          tap('warning');
+        }}
+      />
 
       <Sheet visible={menu} title="Opções" onClose={() => setMenu(false)}>
+        <Button
+          label="Nova categoria"
+          tone="ghost"
+          onPress={() => {
+            setMenu(false);
+            setCategoryEditor('new');
+          }}
+        />
         <Button
           label={currentList.shared ? 'Lista da casa' : 'Abrir para a casa'}
           tone="ghost"
@@ -373,6 +543,45 @@ export default function ListScreen() {
         shared={Boolean(currentList.shared)}
         onClose={() => setHouseOpen(false)}
       />
+      <CategorySheet
+        visible={categoryEditor !== null}
+        initial={categoryEditor && categoryEditor !== 'new' ? categoryEditor : null}
+        onClose={() => setCategoryEditor(null)}
+        onSave={saveCategory}
+        onDelete={categoryEditor && categoryEditor !== 'new' ? () => confirmDeleteCategory(categoryEditor) : undefined}
+      />
+      <Sheet
+        visible={moving !== null}
+        title="Mover produto"
+        subtitle={moving?.title}
+        onClose={() => setMoving(null)}
+      >
+        {moving?.categoryId && (
+          <Button
+            label="Tirar da categoria"
+            tone="ghost"
+            onPress={() => {
+              moveItem(moving.id, null);
+              setMoving(null);
+              tap('light');
+            }}
+          />
+        )}
+        {categories.map((category) => (
+          <Button
+            key={category.id}
+            label={category.name}
+            icon={category.icon}
+            tone={moving?.categoryId === category.id ? 'solid' : 'ghost'}
+            onPress={() => {
+              if (!moving) return;
+              moveItem(moving.id, category.id);
+              setMoving(null);
+              tap('light');
+            }}
+          />
+        ))}
+      </Sheet>
       {currentList && (
         <RecurringSheet
           visible={repeatOpen}
@@ -385,61 +594,39 @@ export default function ListScreen() {
   );
 }
 
-function ItemRow({
-  item,
-  onToggle,
-  onEdit,
-}: {
-  item: Item;
-  onToggle: () => void;
-  onEdit: () => void;
-}) {
-  const line = item.price * item.unities;
-  return (
-    <View style={[styles.row, item.isCompleted && styles.rowDone]}>
-      <Pressable
-        accessibilityRole="checkbox"
-        accessibilityState={{ checked: item.isCompleted }}
-        accessibilityLabel={item.isCompleted ? 'Tirar do carrinho' : 'Colocar no carrinho'}
-        onPress={onToggle}
-        style={[styles.check, item.isCompleted && styles.checkOn]}
-      >
-        {item.isCompleted && <Feather name="check" size={16} color={colors.cream} />}
-      </Pressable>
-      <Pressable onPress={onEdit} style={styles.rowBody}>
-        <Text style={[styles.itemTitle, item.isCompleted && styles.itemDone]} numberOfLines={2}>
-          {item.title}
-        </Text>
-        <Text style={styles.itemMeta}>
-          {item.note ?? `${item.unities} un`}
-          {item.store ? ` · ${item.store}` : ''}
-          {item.unities > 1 && item.price > 0 ? ` · ${formatBRL(item.price)} cada` : ''}
-        </Text>
-      </Pressable>
-      <Text style={[styles.itemPrice, line <= 0 && styles.itemMissing]}>
-        {line > 0 ? formatBRL(line) : 'sem preço'}
-      </Text>
-    </View>
-  );
-}
-
 function ItemEditor({
   editor,
+  categories,
   onClose,
   onSave,
   onDelete,
 }: {
-  editor: Exclude<EditorState, null>;
+  editor: EditorState;
+  categories: Category[];
   onClose: () => void;
-  onSave: (draft: { title: string; price: number; unities: number; store: string }) => void;
+  onSave: (draft: { title: string; price: number; unities: number; store: string; categoryId: string | null }) => void;
   onDelete: () => void;
 }) {
-  const initial = editor.mode === 'edit' ? editor.item : null;
+  const remembered = useRef<Exclude<EditorState, null> | null>(null);
+  if (editor) remembered.current = editor;
+  const shown = editor ?? remembered.current;
+  const initial = shown?.mode === 'edit' ? shown.item : null;
   const [title, setTitle] = useState(initial?.title ?? '');
   const [price, setPrice] = useState(initial?.price ?? 0);
   const [unities, setUnities] = useState(initial?.unities ?? 1);
   const [store, setStore] = useState(initial?.store ?? '');
+  const [categoryId, setCategoryId] = useState<string | null>(initial?.categoryId ?? null);
   const [history, setHistory] = useState<PriceRecord[]>([]);
+
+  useEffect(() => {
+    if (!editor) return;
+    const item = editor.mode === 'edit' ? editor.item : null;
+    setTitle(item?.title ?? '');
+    setPrice(item?.price ?? 0);
+    setUnities(item?.unities ?? 1);
+    setStore(item?.store ?? '');
+    setCategoryId(item?.categoryId ?? null);
+  }, [editor]);
 
   useEffect(() => {
     const name = title.trim();
@@ -453,11 +640,14 @@ function ItemEditor({
     return () => clearTimeout(timer);
   }, [title, initial?.barcode]);
 
+  if (!shown) return null;
+  const creating = shown.mode === 'create';
+
   return (
     <Sheet
-      visible
-      title={editor.mode === 'create' ? 'Novo item' : 'Editar item'}
-      subtitle={editor.mode === 'create' ? 'O preço pode ficar para a hora da etiqueta.' : undefined}
+      visible={editor !== null}
+      title={creating ? 'Novo item' : 'Editar item'}
+      subtitle={creating ? 'O preço pode ficar para a hora da etiqueta.' : undefined}
       onClose={onClose}
     >
       <ItemFields
@@ -471,6 +661,9 @@ function ItemEditor({
         store={store}
         onChangeStore={setStore}
       />
+      {categories.length > 0 && (
+        <CategoryPicker categories={categories} value={categoryId} onChange={setCategoryId} />
+      )}
       {history[0] && (
         <Text style={styles.history}>
           Última vez: {formatBRL(history[0].price)}
@@ -479,11 +672,11 @@ function ItemEditor({
         </Text>
       )}
       <Button
-        label={editor.mode === 'create' ? 'Adicionar' : 'Salvar'}
-        onPress={() => onSave({ title, price, unities, store })}
+        label={creating ? 'Adicionar' : 'Salvar'}
+        onPress={() => onSave({ title, price, unities, store, categoryId })}
         disabled={!title.trim()}
       />
-      {editor.mode === 'edit' && (
+      {!creating && (
         <Button label="Excluir item" tone="danger" onPress={onDelete} />
       )}
     </Sheet>
@@ -522,16 +715,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 16,
     paddingBottom: 8,
+    gap: 10,
   },
-  track: {
-    height: 6,
-    borderRadius: 99,
-    backgroundColor: colors.paperDeep,
-    overflow: 'hidden',
+  organize: {
+    alignSelf: 'flex-start',
   },
-  fill: {
-    height: '100%',
-    backgroundColor: colors.moss,
+  organizeText: {
+    fontFamily: fonts.semibold,
+    fontSize: 14,
+    color: colors.mossDark,
   },
   empty: {
     flex: 1,
@@ -551,66 +743,11 @@ const styles = StyleSheet.create({
     color: colors.inkSoft,
     maxWidth: 360,
   },
-  row: {
-    backgroundColor: colors.card,
-    borderRadius: 18,
-    borderWidth: 1,
-    borderColor: colors.line,
-    padding: 12,
-    marginBottom: 8,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  rowDone: {
-    backgroundColor: colors.mossSoft,
-    borderColor: 'transparent',
-  },
-  check: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    borderWidth: 1.5,
-    borderColor: colors.moss,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  checkOn: {
-    backgroundColor: colors.moss,
-  },
-  rowBody: {
-    flex: 1,
-    gap: 2,
-  },
-  itemTitle: {
-    fontFamily: fonts.semibold,
-    fontSize: 16,
-    color: colors.ink,
-  },
-  itemDone: {
-    textDecorationLine: 'line-through',
-    color: colors.inkSoft,
-  },
-  itemMeta: {
-    fontFamily: fonts.body,
-    fontSize: 13,
-    color: colors.mute,
-  },
   history: {
     fontFamily: fonts.body,
     fontSize: 14,
     lineHeight: 20,
     color: colors.inkSoft,
-  },
-  itemPrice: {
-    fontFamily: fonts.semibold,
-    fontSize: 14,
-    color: colors.ink,
-    fontVariant: ['tabular-nums'],
-  },
-  itemMissing: {
-    color: colors.clay,
-    fontFamily: fonts.medium,
   },
   dock: {
     position: 'absolute',
